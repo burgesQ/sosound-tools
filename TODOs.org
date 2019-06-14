@@ -4,19 +4,25 @@
 
   Here is a summary of all ideas / task that have been done / will be done.
 
-** WIP dl utility [5/7] [71%]
+** DONE dl utility [8/8] [100%]
+   CLOSED: [2019-06-14 Fri 16:45]
    :LOGBOOK:
+   CLOCK: [2019-06-14 Fri 15:40]--[2019-06-14 Fri 16:44] =>  1:04
    CLOCK: [2019-06-14 Fri 14:16]--[2019-06-14 Fri 14:40] =>  0:24
    :END:
 - [X] cli params
-- [X] conf files [2/2] [100%]
+- [X] conf files [3/3] [100%]
   - [X] yt
   - [X] dl
+  - [X] ignore `#`
 - [X] install if not
-- [ ] dl
+- [X] dl
 - [X] waiter
 - [X] read config file
-- [ ] logger
+- [X] logger
+- [X] doc [2/2] [100%]
+  - [X] conf file
+  - [X] running
 
 ** TODO sync utility [0/7] [0%]
 - [ ] cli param

@@ -41,14 +41,6 @@ exit_if_not_installed() {
     #    debug "$toTest is present on this system"
 }
 
-create_dir_if_not() {
-    local path=$1
-
-    if [ ! -d "$path" ]; then
-        mkdir -p $path
-    fi
-}
-
 check_if_dir_exist() {
     local dir=$1
     local what=$2

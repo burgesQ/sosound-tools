@@ -1,26 +1,47 @@
 # README.md
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [README.md](#readmemd)
+    - [what](#what)
+    - [requirement](#requirement)
+    - [`dl`](#dl)
+        - [usage](#usage)
+        - [deps](#deps)
+        - [config files](#config-files)
+            - [dl.conf](#dlconf)
+            - [youtube-dl.conf](#youtube-dlconf)
+            - [cookies.txt](#cookiestxt)
+        - [running download](#running-download)
+    - [sync](#sync)
+        - [usage](#usage-1)
+        - [running sync](#running-sync)
+
+<!-- markdown-toc end -->
+
+
 ## what
 
 Some bash script that download music and sync them on a remote android device.
 
 | script        | what                           |
 | :-:           | :-:                            |
-| [dl](#dl)     | utility used to download Music |
-| [sync](#sync) | utility used to sync Music     |
+| [`dl`](#dl)   | utility used to download Music |
+| [`sync`](#sync) | utility used to sync Music     |
 
-## how
-
-### requirement
+## requirement
 
 You'll need [scdl](1), [youtube-dl](2), [ffmpeg](3), [adb](4) and [adb-sync](5).
 
-### dl
+## `dl`
 
-#### usage
+`dl` is a simple utility than can be used to download file from YouTube or SoundCloud.
+
+### usage
 
 ```bash
-Usage : dl -l [0..3] -d [path] -c [path] -y [path] -i -h
+Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -i -h
 
 Run dl, a simple music downloader script.
 
@@ -32,6 +53,8 @@ Configuration options :
             Default : [/home/master/repo/perso/music_helper/etc/dl.conf]
     -y:     youtube-dl configuration file path. A full path must be provide.
             Default : [/home/master/repo/perso/music_helper/etc/youtube-dl.conf]
+    -m:     mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
+            Default : [0]
 
 Misc options :
 
@@ -41,17 +64,55 @@ Misc options :
     -h:     display this screen
 ```
 
-#### example
+### deps
 
+You can install the dependencies by running `dl -i`.
 
-### sync
+### config files
 
-#### usage
+#### dl.conf
 
-#### example
+The `dl.conf` file is a simple text file that container, on each line (terminated by a \n), a name and a url.
+
+The name will be used to create a directory named after it and the music from the url will be downloaded inside.
+
+The following example will downloaexample the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
+```
+$ cat dl.conf
+YouTube https://www.youtube.com/watch?v=wYhwcsjkbiw&list=LL8BoiGKpm1cpDd_nvkMzdxw&index=24&t=0s
+
+```
+
+Don't forget to add a return at the last line, otherwise the line won't be handled !
+
+you can use the `#` char to ignore a line.
+
+#### youtube-dl.conf
+
+The [youtube-dl documentation](2) is what you're looking for.
+
+#### cookies.txt
+
+Again, the [youtube-dl documentation](6) get the things done.
+
+### running download
+
+Assuming you either have your own `youtube-dl.conf`, `cookies.txt` and `dl.conf` **OR** that you are a lazy guys :
+
+```bash
+$ dl -i
+$ dl -l 3
+```
+
+## sync
+
+### usage
+
+### running sync
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl
 [3]: mt
 [4]: mt
 [5]: https://github.com/google/adb-sync
+[6]: https://github.com/ytdl-org/youtube-dl#how-do-i-pass-cookies-to-youtube-dl
