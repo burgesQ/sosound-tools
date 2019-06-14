@@ -28,10 +28,13 @@
    :LOGBOOK:
    CLOCK: [2019-06-14 Fri 16:55]--[2019-06-14 Fri 17:14] =>  0:19
    :END:
-- [ ] cli param
+- [ ] cli param [0/3] [0%]
+  - [ ] connect ip
+  - [ ] sync out path
+  - [ ] sync in path
 - [X] conf file
 - [ ] install if not
-- [ ] connect
+- [ ] connect : addr
 - [ ] sync
 - [X] waiter ?
 - [ ] logger

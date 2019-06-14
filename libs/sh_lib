@@ -18,7 +18,7 @@ function debug {
 
 function warn {
     if [ $LEVEL -gt 1 ]; then
-        echo -e "\e[1mBold$1\e[0m"
+        echo -e "$1"
     fi
 }
 
