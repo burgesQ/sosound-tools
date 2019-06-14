@@ -1,0 +1,36 @@
+#!/bin/bash
+
+LEVEL=2
+
+function usage {
+    (>&2 echo -e "$1")
+}
+
+function error {
+    (>&2 echo -e "\e[101m$1\e[0m")
+}
+
+function debug {
+    if [ $LEVEL -gt 1 ]; then
+        echo -e "\e[93m$1\e[0m"
+    fi
+}
+
+function info {
+    if [ $LEVEL -gt 0 ]; then
+        echo -e "\e[92m$1\e[0m"
+    fi
+}
+
+exit_if_not() {
+    local toTest=$1
+
+    #    info "Testing $toTest"
+    if [ `which $toTest` == "" ]; then
+        error "Can't find the $toTest package"
+        error "Please install the $toTest package before running"
+        exit 2
+    fi
+
+    #    debug "$toTest is present on this system"
+}

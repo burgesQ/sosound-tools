@@ -1,0 +1,32 @@
+#+TODO: IDEA TODO WIP REVIEW | DONE CANCELED
+
+* musci_helper todo's
+
+  Here is a summary of all ideas / task that have been done / will be done.
+
+** WIP dl utility [3/6] [50%]
+- [X] cli params
+- [ ] conf files [0/2] [0%]
+  - [ ] yt
+  - [ ] dl
+- [X] install if not
+- [ ] dl
+- [X] waiter
+- [ ] logger
+
+** TODO sync utility [0/7] [0%]
+- [ ] cli param
+- [ ] conf file
+- [ ] install if not
+- [ ] connect
+- [ ] sync
+- [ ] waiter ?
+- [ ] logger
+
+** Fixes [0/0] [0%]
+*** dl [0/0] [0%]
+*** sync [0/0] [0%]
+
+** Enhancement [0/0] [0%]
+*** dl [0/0] [0%]
+*** sync [0/0] [0%]

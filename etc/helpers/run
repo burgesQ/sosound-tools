@@ -1,0 +1,22 @@
+#! /bin/sh
+
+run() {
+    path=$1
+    helper=$2
+
+    echo
+    echo "Running $path ..."
+    cd ../$path && ../helper/helper_$helper
+    echo "$path done."
+    echo
+}
+
+echo "Running ..."
+
+run "SoundCloud" "scdl"
+run "YouTube " "youtube"
+run "Innervision " "innervision"
+run "Afterlife " "afterlife"
+run "Drumcode " "drumcode"
+
+echo "Done."

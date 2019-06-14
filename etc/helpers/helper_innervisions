@@ -1,0 +1,3 @@
+#! /bin/sh
+
+youtube-dl --cookies ../cookies.txt"https://www.youtube.com/playlist?list=UUC7eKMxcVk1LZwzJlBdsVuQ"

@@ -1,0 +1,197 @@
+#!/bin/bash
+
+# possible return value from the scirpt are :
+# 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided
+
+# fetch script path for import
+# https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+source $SCRIPTPATH/libs/sh_lib
+
+USAGE="
+usage : ./dl -l <0..2> -d /download/path -c /config/path -y /youtube/conf/path -h
+
+    -l : log level (0=error,1=info,2=debug)
+    -d : root path for downloads
+    -c : download configuration file path
+    -y : youtube-dl configuration file pathch
+    -h : display this screen
+"
+
+# static value
+COOKIE_PATH=$SCRIPTPATH/etc/cookies.txt
+LOG_PATH=$SCRIPTPATH/etc/logs/
+LOCK_DIR=/tmp/music_dl/
+
+# cli value
+YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
+DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
+DL_PATH=$SCRIPTPATH/Music/
+YT_DL_ARGS="--config-location $YT_CONF_PATH --cookies $COOKIE_PATH"
+
+#
+# Soundcloud functions
+#
+
+install_scdl() {
+    exit_if_not "pip3"
+    pip3 install scdl
+    info "scdl (a soundcloud downloader) installed"
+}
+
+download_from_sc_playlist() {
+    local url=$1
+    debug "Downloading playlist from soundcloud ..."
+    scdl -l "$url" -p -c --debug --download-archive .scdl_playlist.txt;
+}
+
+download_from_sc_like() {
+    local url=$1
+    debug "Downloading playlist from soundcloud .. "
+    scdl -l "$url" -l -c --debug --download-archive .scdl_like.txt;
+}
+
+#
+# YouTube functions
+#
+
+install_yt() {
+    exit_if_not "curl"
+    sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+    sudo chmod a+rx /usr/local/bin/youtube-dl
+    info "youtube-dl (a youtube dowmloader) installed"
+}
+
+download_from_yt() {
+    local url=$1
+    # add dl archive per file
+    youtube-dl $YT_DL_ARGS "$url"
+}
+
+#
+# Global function
+#
+
+downloader() {
+    local path=$1
+    local url=$2
+
+    local dl_path=$DL_PATH$path
+    local log_file=$LOG_PATH$path.log
+
+    touch $LOCK_DIR/$path
+    debug "Downloading $path stuffs : running ..."
+
+    echo "$dl_path"
+    echo "$log_file"
+
+    cd "$dl_path"
+    if [ grep "youtube" "$2" ]; then
+        # send to yt
+        pwd
+        sleep 10
+    else
+        pwd
+        sleep 10
+        # send to sc
+    fi
+    cd -
+
+    debug "Downloading $path stuffs : done."
+    rm $LOCK_DIR/$path
+}
+
+# dl files
+download_music() {
+    downloader "YouTube" "youtube" &
+    downloader "Innervisions" "innervisions" &
+    downloader "Afterlife" "afterlife" &
+    downloader "Drumcode" "drumcode" &
+    downloader "SoundCloud" "scdl" &
+}
+
+# opt
+
+run() {
+    info "Downloading music files : running ..."
+
+    # read file per line
+    # split line
+    # check content
+    # send to dl &
+    download_music
+
+    sleep 1
+    info "Waiting for downlaod to finish"
+    # wait for the downloads script to finish, which is marked by no files in a specific directory
+    while true
+    do
+        if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+            break
+        fi
+        echo -n "."
+        sleep 3
+    done
+
+    info "Downloading music files : done."
+}
+
+#
+# Perform some check relative to the binaries
+# and the path used
+#
+
+setup() {
+
+    info "Running a few checks ..."
+
+    prgs=('scdl' 'youtube-dl' 'ffmpeg')
+    for prg in "${prgs[@]}"
+    do
+        exit_if_not $prg
+    done
+
+    if [ ! -d "$DL_PATH" ] || [ ! -f "$YT_CONF_PATH" ] || [ -f "$DL_CONF_PATH" ]; then
+        error "Invalid path provided."
+        exit 3
+    fi
+
+    mkdir -p $LOCK_DIR
+
+    info "All okay let's process !"
+}
+
+# main
+
+# TODO: maybe some check ?
+# pass dl path as arg
+# pass config file as arg
+while getopts "l:d:c:y:h" o; do
+    case "${o}" in
+        l)
+            LEVEL=${OPTARG}
+	          ;;
+        d)
+            DL_PATH=${OPTARG}
+            ;;
+        c)
+            DL_CONF_PATH=${OPTARG}
+            ;;
+        y)
+            YT_CONF_PATH=${OPTARG}
+            ;;
+	      h)
+	          usage "$USAGE"
+            exit 0
+	          ;;
+	      *)
+	          usage "$USAGE"
+	          exit 1
+	          ;;
+    esac
+done
+
+YT_DL_ARGS="--config-location $YT_CONF_PATH --cookies $COOKIE_PATH"
+
+setup && run

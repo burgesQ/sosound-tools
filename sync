@@ -1,0 +1,65 @@
+#!/bin/bash
+
+# possible return value from the scirpt are :
+# 0 : all ok ; 1 : cli opt ; 2 : required package are not present
+
+# fetch script path for import
+# https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+source $SCRIPTPATH/libs/logger
+
+DL_PATH=$SCRIPTPATH/../
+LOCK_DIR=/tmp/music_dl
+LOG_PATH=`pwd`/
+
+USAGE="
+usage : ./sync -l <0..2> -h
+
+    -l : log level (0=error,1=info,2=debug)
+    -h : display this screen"
+
+# sync files
+sync_files() {
+    info "Syncing file with the android device : running ..."
+
+    # check if no lock file
+
+    info "Syncing file with the android device : done."
+}
+
+# opt
+
+setup() {
+    info "Running a few checks ..."
+    prgs=('scdl' 'youtube-dl' 'ffmpeg' 'adb' 'adb-sync')
+    for prg in "${prgs[@]}"
+    do
+        exit_if_not $prg
+    done
+
+    mkdir -p $LOCK_DIR
+
+    info "All okay let's process !"
+}
+
+# main
+
+# TODO: maybe some check ?
+while getopts "l:h" o; do
+    case "${o}" in
+        l)
+            LEVEL=${OPTARG}
+	          ;;
+	      h)
+	          usage "$USAGE"
+	          ;;
+	      *)
+	          usage "$USAGE"
+	          exit 1
+	          ;;
+    esac
+done
+
+setup
+sync_files
