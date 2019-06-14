@@ -11,8 +11,14 @@ function error {
 }
 
 function debug {
-    if [ $LEVEL -gt 1 ]; then
+    if [ $LEVEL -gt 2 ]; then
         echo -e "\e[93m$1\e[0m"
+    fi
+}
+
+function warn {
+    if [ $LEVEL -gt 1 ]; then
+        echo -e "\e[1mBold$1\e[0m"
     fi
 }
 
@@ -22,7 +28,7 @@ function info {
     fi
 }
 
-exit_if_not() {
+exit_if_not_installed() {
     local toTest=$1
 
     #    info "Testing $toTest"
@@ -40,5 +46,25 @@ create_dir_if_not() {
 
     if [ ! -d "$path" ]; then
         mkdir -p $path
+    fi
+}
+
+check_if_dir_exist() {
+    local dir=$1
+    local what=$2
+
+    if [ ! -d "$dir" ]; then
+        error "Invalid dir path for $what : [$dir]"
+        exit 3
+    fi
+}
+
+check_if_file_exist() {
+    local file=$1
+    local what=$2
+
+    if [ ! -f "$file" ]; then
+        error "Invalid file path for the $wath : [$file]"
+        exit 3
     fi
 }

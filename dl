@@ -10,12 +10,13 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 source $SCRIPTPATH/libs/sh_lib
 
 USAGE="
-usage : ./dl -l <0..2> -d /download/path -c /config/path -y /youtube/conf/path -h
+usage : ./dl -l <0..3> -d /download/path -c /config/path -y /youtube/conf/path -i -h
 
-    -l : log level (0=error,1=info,2=debug)
+    -l : log level (0=error,1=info,2=warn,3=debug). Default to 2
     -d : root path for downloads
     -c : download configuration file path
     -y : youtube-dl configuration file pathch
+    -i : install required packages
     -h : display this screen
 "
 
@@ -29,40 +30,46 @@ YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
 DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
 YT_DL_ARGS="--config-location $YT_CONF_PATH --cookies $COOKIE_PATH"
+INSTALL=0
 
 #
 # Soundcloud functions
 #
 
+# install scdl if needed
 install_scdl() {
-    exit_if_not "pip3"
+    exit_if_not_installed "pip3"
     pip3 install scdl
     info "scdl (a soundcloud downloader) installed"
 }
 
+# download playlists from soundcloud
 download_from_sc_playlist() {
     local url=$1
-    debug "Downloading playlist from soundcloud ..."
+    warn "Downloading playlist from soundcloud ..."
     scdl -l "$url" -p -c --debug --download-archive .scdl_playlist.txt;
 }
 
+# download likes from soundcloud
 download_from_sc_like() {
     local url=$1
-    debug "Downloading playlist from soundcloud .. "
-    scdl -l "$url" -l -c --debug --download-archive .scdl_like.txt;
+    warn "Downloading playlist from soundcloud .. "
+    scdl -l "$url" -f -c --debug --download-archive .scdl_like.txt;
 }
 
 #
 # YouTube functions
 #
 
+# install youtube-dl
 install_yt() {
-    exit_if_not "curl"
+    exit_if_not_installed "curl"
     sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
     sudo chmod a+rx /usr/local/bin/youtube-dl
     info "youtube-dl (a youtube dowmloader) installed"
 }
 
+# download (playlist/track) from youtube
 download_from_yt() {
     local url=$1
     # add dl archive per file
@@ -73,6 +80,10 @@ download_from_yt() {
 # Global function
 #
 
+#
+# Process the argument; create the dl dir;
+# handle the log / flag file; run the dl
+#
 downloader() {
 
     local path=$1
@@ -99,7 +110,7 @@ downloader() {
         sleep 10
         # send to sc
     else
-        error "url schema not supported : $url"
+        warn "url schema not supported : $url"
     fi
 
     cd -
@@ -108,11 +119,30 @@ downloader() {
     rm $LOCK_DIR/$path
 }
 
-# opt
+#
+# Main logic function (checking - running - waiting)
+#
+
+#
+# Wait for all download to be complete.
+# All download are complete once the $LOCK_DIR/
+# directory is empty
+#
+wait_for_download() {
+    info "Waiting for downlaod to finish"
+    while true
+    do
+        if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+            break
+        fi
+        echo -n "."
+        sleep 3
+    done
+}
 
 #
 # Read the download configuration file ;
-# run the download if neede and then wait
+# run the download if needed and then wait
 # for all worker to finish
 #
 run() {
@@ -129,22 +159,13 @@ run() {
 
         if [ -z "$url" ] || [ -z "$path" ]; then
             error "Invalid value in the download configuration file for ($path):[$url]"
-            error "Skipping"
+            warn "Skipping"
         else
             downloader $path $url &
         fi
     done < <(cat $DL_CONF_PATH)
 
-    sleep 1
-    info "Waiting for downlaod to finish"
-    while true
-    do
-        if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
-            break
-        fi
-        echo -n "."
-        sleep 3
-    done
+    sleep 1 && wait_for_download
 
     info "Downloading music files : done."
 }
@@ -154,29 +175,7 @@ run() {
 # and the path used into the script
 #
 setup() {
-
     info "Running a few checks ..."
-
-    prgs=('scdl' 'youtube-dl' 'ffmpeg')
-    for prg in "${prgs[@]}"
-    do
-        exit_if_not $prg
-    done
-
-    if [ ! -d "$DL_PATH" ]; then
-        error "Invalid download root path provided : [$DL_PATH]."
-        exit 3
-    elif [ ! -f "$YT_CONF_PATH" ]; then
-        error "Invalid youtube-dl configuration file provided : [$YT_CONF_PATH]."
-        exit 3
-    elif  [ ! -f "$DL_CONF_PATH" ]; then
-        error "Invalid download configuration file provided : [$DL_CONF_PATH]."
-        exit 3
-    fi
-
-    mkdir -p $LOCK_DIR
-
-    info "All okay let's process !"
 
     debug "
     download path :          $DL_PATH
@@ -184,13 +183,27 @@ setup() {
     download config file :   $DL_CONF_PATH
     youtube-dl config file : $YT_CONF_PATH
 "
+
+    prgs=('scdl' 'youtube-dl' 'ffmpeg')
+    for prg in "${prgs[@]}"
+    do
+        exit_if_not_installed $prg
+    done
+
+    check_if_dir_exist "$DL_PATH" "download root path"
+    check_if_file_exist "$YT_CONF_PATH" "youtube-dl configuration file"
+    check_if_file_exist "$DL_CONF_PATH" "download configuration file"
+
+    create_dir_if_not $LOCK_DIR
+
+    info "All okay let's process !"
 }
 
 #
 # main
 #
 
-while getopts "l:d:c:y:h" o; do
+while getopts "l:d:c:y:ih" o; do
     case "${o}" in
         l)
             LEVEL=${OPTARG}
@@ -204,6 +217,9 @@ while getopts "l:d:c:y:h" o; do
         y)
             YT_CONF_PATH=${OPTARG}
             ;;
+        i)
+            INSTALL=1
+            ;;
 	      h)
 	          usage "$USAGE"
             exit 0
@@ -214,6 +230,11 @@ while getopts "l:d:c:y:h" o; do
 	          ;;
     esac
 done
+
+if [ $INSTALL -eq 1 ]; then
+    install_scdl && install_yt # ffmpeg
+    exit 0
+fi
 
 YT_DL_ARGS="--config-location $YT_CONF_PATH --cookies $COOKIE_PATH"
 
