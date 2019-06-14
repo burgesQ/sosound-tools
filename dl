@@ -9,17 +9,6 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 source $SCRIPTPATH/libs/sh_lib
 
-USAGE="
-usage : ./dl -l <0..3> -d /download/path -c /config/path -y /youtube/conf/path -i -h
-
-    -l : log level (0=error,1=info,2=warn,3=debug). Default to 2
-    -d : root path for downloads
-    -c : download configuration file path
-    -y : youtube-dl configuration file pathch
-    -i : install required packages
-    -h : display this screen
-"
-
 # static value
 COOKIE_PATH=$SCRIPTPATH/etc/cookies.txt
 LOG_PATH=$SCRIPTPATH/etc/logs/
@@ -31,6 +20,28 @@ DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
 YT_DL_ARGS="--config-location $YT_CONF_PATH --cookies $COOKIE_PATH"
 INSTALL=0
+
+USAGE="
+Usage : dl -l [0..3] -d [path] -c [path] -y [path] -i -h
+
+Run dl, a simple music downloader script.
+
+Configuration options :
+
+    -d:     root path for downloads. A full or relative path can be provide.
+            Default : [$DL_PATH]
+    -c:     download configuration file path. A full path must be provide.
+            Default : [$DL_CONF_PATH]
+    -y:     youtube-dl configuration file path. A full path must be provide.
+            Default : [$YT_CONF_PATH]
+
+Misc options :
+
+    -l:     log level (0=error,1=info,2=warn,3=debug).
+            Default : [$LEVEL]
+    -i:     install required packages
+    -h:     display this screen
+"
 
 #
 # Soundcloud functions
