@@ -1,58 +1,150 @@
 #!/bin/bash
 
 # possible return value from the scirpt are :
-# 0 : all ok ; 1 : cli opt ; 2 : required package are not present
+# 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided ; 4 : sync while dl
 
 # fetch script path for import
 # https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
-source $SCRIPTPATH/libs/logger
+source $SCRIPTPATH/libs/sh_lib
 
-DL_PATH=$SCRIPTPATH/../
-LOCK_DIR=/tmp/music_dl
-LOG_PATH=`pwd`/
+# static value
+LOG_PATH=$SCRIPTPATH/etc/logs/
+LOCK_DIR=/tmp/music_dl/sync/
+DL_LOCK_DIR=/tmp/music_dl/dl/
+
+# cli value
+SYNC_CONF_PATH=$SCRIPTPATH/etc/sync.conf
+DL_PATH=$SCRIPTPATH/Music/
+INSTALL=0
 
 USAGE="
-usage : ./sync -l <0..2> -h
+Usage : sync -d [path] -s [path] -l [0..3] -i -h
 
-    -l : log level (0=error,1=info,2=debug)
-    -h : display this screen"
+Run sync, a simple android sync script.
 
-# sync files
-sync_files() {
-    info "Syncing file with the android device : running ..."
+Configuration options :
 
-    # check if no lock file
+    -d:     root path for root sync path. A full or relative path can be provide.
+            Default : [$DL_PATH]
+    -s:     sync configuration file path. A full path must be provide.
+            Default : [$SYNC_CONF_PATH]
 
-    info "Syncing file with the android device : done."
+Misc options :
+
+    -l:     log level (0=error,1=info,2=warn,3=debug).
+            Default : [$LEVEL]
+    -i:     install required packages
+    -h:     display this screen
+"
+
+# install adb-sync
+
+sync_dir() {
+    local dir=$1
+    # create lock
+    touch $LOCK_DIR/$dir.lock
+    sleep 10
+    # sync file 2>&1> log
+    rm $LOCK_DIR/$dir.lock
+    # remove lock
 }
 
-# opt
+#
+# Wait for all download to be complete.
+# All download are complete once the $LOCK_DIR/
+# directory is empty
+#
+wait_for_sync() {
+    info "Waiting for sync to finish"
+    while true
+    do
+        if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+            break
+        fi
+        echo -n "."
+        sleep 1
+    done
+}
 
+# sync files
+run() {
+    info "Syncing file with the android device : running ..."
+
+    # make newlines the only separator
+    local IFS=$'\n'
+
+    while read f ; do
+        debug "Processing $f"
+
+        if [ $f == \#* ]; then
+            warn "Entry ignored"
+        else
+            echo "let sync $f !"
+            (sync_dir $f) &
+        fi
+    done < <(cat $SYNC_CONF_PATH)
+
+    sleep 1 && wait_for_sync
+
+    info "\nSyncing file with the android device : done."
+}
+
+connect() {
+    # adb connect
+    echo "adb-sync connected"
+    # or exit
+}
+
+#
+# Perform some check relative to the binaries
+# and the path used into the script
+#
 setup() {
     info "Running a few checks ..."
-    prgs=('scdl' 'youtube-dl' 'ffmpeg' 'adb' 'adb-sync')
+
+    debug "
+    download path :          $DL_PATH
+    log path :               $LOG_PATH
+    sync config file :       $SYNC_CONF_PATH
+    loglevel :               $LEVEL
+"
+
+    prgs=('adb-sync')
     for prg in "${prgs[@]}"
     do
-        exit_if_not $prg
+        exit_if_not_installed $prg
     done
+
+    check_if_dir_exist "$DL_PATH" "download root path"
+    check_if_file_exist "$SYNC_CONF_PATH" "sync configuration file"
+
+    if (find $DL_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+        error "Cannot sync while downloading"
+        exit 4
+    fi
 
     mkdir -p $LOCK_DIR
 
     info "All okay let's process !"
 }
 
+#
 # main
+#
 
-# TODO: maybe some check ?
-while getopts "l:h" o; do
+while getopts "l:ih" o; do
     case "${o}" in
         l)
             LEVEL=${OPTARG}
 	          ;;
+        i)
+            INSTALL=1
+            ;;
 	      h)
 	          usage "$USAGE"
+            exit 0
 	          ;;
 	      *)
 	          usage "$USAGE"
@@ -61,5 +153,9 @@ while getopts "l:h" o; do
     esac
 done
 
-setup
-sync_files
+if [ $INSTALL -eq 1 ]; then
+    install_adb-sync
+    exit 0
+fi
+
+setup && connect && run

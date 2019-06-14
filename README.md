@@ -104,9 +104,29 @@ $ dl -i
 $ dl -l 3
 ```
 
-## sync
+## `sync`
 
 ### usage
+
+```bash
+Usage : sync -d [path] -s [path] -l [0..3] -i -h
+
+Run sync, a simple android sync script.
+
+Configuration options :
+
+    -d:     root path for root sync path. A full or relative path can be provide.
+            Default : [/home/master/repo/perso/music_helper/Music/]
+    -s:     sync configuration file path. A full path must be provide.
+            Default : [/home/master/repo/perso/music_helper/etc/sync.conf]
+
+Misc options :
+
+    -l:     log level (0=error,1=info,2=warn,3=debug).
+            Default : [2]
+    -i:     install required packages
+    -h:     display this screen
+```
 
 ### running sync
 

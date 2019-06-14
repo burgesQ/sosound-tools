@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # possible return value from the scirpt are :
-# 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided
+# 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided ; dl:  while sync 
 
 # fetch script path for import
 # https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
@@ -11,7 +11,8 @@ source $SCRIPTPATH/libs/sh_lib
 
 # static value
 LOG_PATH=$SCRIPTPATH/etc/logs/
-LOCK_DIR=/tmp/music_dl/
+LOCK_DIR=/tmp/music_dl/dl/
+SYNC_LOCK_DIR=/tmp/music_dl/sync
 
 # cli value
 YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
@@ -217,6 +218,11 @@ setup() {
     check_if_dir_exist "$DL_PATH" "download root path"
     check_if_file_exist "$YT_CONF_PATH" "youtube-dl configuration file"
     check_if_file_exist "$DL_CONF_PATH" "download configuration file"
+
+    if (find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+        error "Cannot dl while syncing"
+        exit 4
+    fi
 
     mkdir -p $LOCK_DIR
 

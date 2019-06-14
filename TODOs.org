@@ -1,4 +1,4 @@
-#+TODO: IDEA TODO WIP REVIEW | DONE CANCELED
+#+TODO: IDEA TODO WIP | DONE CANCELED
 
 * musci_helper todo's
 
@@ -24,14 +24,18 @@
   - [X] conf file
   - [X] running
 
-** TODO sync utility [0/7] [0%]
+** WIP sync utility [2/8] [25%]
+   :LOGBOOK:
+   CLOCK: [2019-06-14 Fri 16:55]--[2019-06-14 Fri 17:14] =>  0:19
+   :END:
 - [ ] cli param
-- [ ] conf file
+- [X] conf file
 - [ ] install if not
 - [ ] connect
 - [ ] sync
-- [ ] waiter ?
+- [X] waiter ?
 - [ ] logger
+- [ ] doc
 
 ** Fixes [0/0] [0%]
 *** dl [0/0] [0%]
