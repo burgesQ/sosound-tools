@@ -1,7 +1,14 @@
 #!/bin/bash
 
 # possible return value from the scirpt are :
-# 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided ; 4 : sync while dl ; 5 : sync while sync ; 6 : invalid ip ; 7 :
+# 0 : all ok
+# 1 : cli opt
+# 2 : required package are not present
+# 3 : invalid path provided
+# 4 : sync while dl
+# 5 : sync while sync
+# 6 : invalid ip
+# 7 :
 
 # fetch script path for import
 # https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
@@ -108,7 +115,7 @@ connect() {
     # adb connect
     info "connecting to the android device"
     adb connect "$CONNECT_IP"
-    if [ $? -ne 0 ]; then
+    if [ `adb devices | grep "$CONNECT_IP"`="" ]; then
         exit 6
     fi
 

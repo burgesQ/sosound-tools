@@ -104,31 +104,45 @@ $ dl -i
 $ dl -l 3
 ```
 
+To update all youtube contente from a specific directory :
+```bash
+$ dl -l 3 -d "/media/master/dd/Music/" -m 1
+```
+
 ## `sync`
+
+TODO: what that shit
 
 ### usage
 
 ```bash
-Usage : sync -d [path] -s [path] -l [0..3] -i -h
+Usage : sync -d [path] -s [path] -c [IP] -l [0..3] -i -h
 
 Run sync, a simple android sync script.
 
 Configuration options :
 
     -d:     root path for root sync path. A full or relative path can be provide.
-            Default : [/home/master/repo/perso/music_helper/Music/]
+            Default : [$DL_PATH]
+    -c:     connect ip of the android device. Please be sure that the device support
+            adb over tcpip.
+            Default : [$CONNECT_IP]
     -s:     sync configuration file path. A full path must be provide.
-            Default : [/home/master/repo/perso/music_helper/etc/sync.conf]
+            Default : [$SYNC_CONF_PATH]
 
 Misc options :
 
     -l:     log level (0=error,1=info,2=warn,3=debug).
-            Default : [2]
+            Default : [$LEVEL]
     -i:     install required packages
     -h:     display this screen
 ```
 
 ### running sync
+
+```bash
+$sync -l 3 -d "/media/master/dd/Music" -c 192.168.8.102
+```
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl
