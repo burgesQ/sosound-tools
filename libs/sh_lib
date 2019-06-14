@@ -34,3 +34,11 @@ exit_if_not() {
 
     #    debug "$toTest is present on this system"
 }
+
+create_dir_if_not() {
+    local path=$1
+
+    if [ ! -d "$path" ]; then
+        mkdir -p $path
+    fi
+}

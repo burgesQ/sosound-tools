@@ -74,57 +74,69 @@ download_from_yt() {
 #
 
 downloader() {
+
     local path=$1
     local url=$2
 
     local dl_path=$DL_PATH$path
     local log_file=$LOG_PATH$path.log
 
-    touch $LOCK_DIR/$path
+    touch $LOCK_DIR$path
     debug "Downloading $path stuffs : running ..."
 
     echo "$dl_path"
     echo "$log_file"
 
+    create_dir_if_not "$dl_path"
+
     cd "$dl_path"
-    if [ grep "youtube" "$2" ]; then
+    if [ `echo $url | grep "youtube"` ]; then
         # send to yt
         pwd
         sleep 10
-    else
+    elif [ `echo $url | grep "soundcloud"` ]; then
         pwd
         sleep 10
         # send to sc
+    else
+        error "url schema not supported : $url"
     fi
+
     cd -
 
     debug "Downloading $path stuffs : done."
     rm $LOCK_DIR/$path
 }
 
-# dl files
-download_music() {
-    downloader "YouTube" "youtube" &
-    downloader "Innervisions" "innervisions" &
-    downloader "Afterlife" "afterlife" &
-    downloader "Drumcode" "drumcode" &
-    downloader "SoundCloud" "scdl" &
-}
-
 # opt
 
+#
+# Read the download configuration file ;
+# run the download if neede and then wait
+# for all worker to finish
+#
 run() {
     info "Downloading music files : running ..."
 
-    # read file per line
-    # split line
-    # check content
-    # send to dl &
-    download_music
+    # make newlines the only separator
+    local IFS=$'\n'
+
+    while read f ; do
+        debug "Processing $f"
+
+        local path=`echo "$f" | cut -d ' ' -f1`
+        local url=`echo "$f" | cut -d ' ' -f2`
+
+        if [ -z "$url" ] || [ -z "$path" ]; then
+            error "Invalid value in the download configuration file for ($path):[$url]"
+            error "Skipping"
+        else
+            downloader $path $url &
+        fi
+    done < <(cat $DL_CONF_PATH)
 
     sleep 1
     info "Waiting for downlaod to finish"
-    # wait for the downloads script to finish, which is marked by no files in a specific directory
     while true
     do
         if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
@@ -139,9 +151,8 @@ run() {
 
 #
 # Perform some check relative to the binaries
-# and the path used
+# and the path used into the script
 #
-
 setup() {
 
     info "Running a few checks ..."
@@ -152,21 +163,33 @@ setup() {
         exit_if_not $prg
     done
 
-    if [ ! -d "$DL_PATH" ] || [ ! -f "$YT_CONF_PATH" ] || [ -f "$DL_CONF_PATH" ]; then
-        error "Invalid path provided."
+    if [ ! -d "$DL_PATH" ]; then
+        error "Invalid download root path provided : [$DL_PATH]."
+        exit 3
+    elif [ ! -f "$YT_CONF_PATH" ]; then
+        error "Invalid youtube-dl configuration file provided : [$YT_CONF_PATH]."
+        exit 3
+    elif  [ ! -f "$DL_CONF_PATH" ]; then
+        error "Invalid download configuration file provided : [$DL_CONF_PATH]."
         exit 3
     fi
 
     mkdir -p $LOCK_DIR
 
     info "All okay let's process !"
+
+    debug "
+    download path :          $DL_PATH
+    log path :               $LOG_PATH
+    download config file :   $DL_CONF_PATH
+    youtube-dl config file : $YT_CONF_PATH
+"
 }
 
+#
 # main
+#
 
-# TODO: maybe some check ?
-# pass dl path as arg
-# pass config file as arg
 while getopts "l:d:c:y:h" o; do
     case "${o}" in
         l)
