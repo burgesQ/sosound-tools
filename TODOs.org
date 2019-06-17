@@ -45,10 +45,16 @@
 *** dl [0/0] [0%]
 *** sync [0/0] [0%]
 
-** Enhancement [0/2] [0%]
+** Enhancement [0/3] [0%]
 *** dl [0/0] [0%]
 *** sync [0/0] [0%]
 *** IDEA a wrapper  [0/2] [0%]
     - [ ] some cli management
     - [ ] a logging option ?
 *** IDEA a simple api to access the scirpt ? [0/0] [0%]
+*** IDEA versioning of the utilities ?
+
+** Process
+*** dl
+*** diff
+*** new sync

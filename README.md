@@ -25,9 +25,9 @@
 
 Some bash script that download music and sync them on a remote android device.
 
-| script        | what                           |
-| :-:           | :-:                            |
-| [`dl`](#dl)   | utility used to download Music |
+| script          | what                           |
+| :-:             | :-:                            |
+| [`dl`](#dl)     | utility used to download Music |
 | [`sync`](#sync) | utility used to sync Music     |
 
 ## requirement
@@ -111,7 +111,7 @@ $ dl -l 3 -d "/media/master/dd/Music/" -m 1
 
 ## `sync`
 
-TODO: what that shit
+`sync` is a simple script that remotely connect to a android device and then synchronize the content of the local directory and the android remote one.
 
 ### usage
 
@@ -146,7 +146,7 @@ $sync -l 3 -d "/media/master/dd/Music" -c 192.168.8.102
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl
-[3]: mt
-[4]: mt
+[3]: https://ffmpeg.org/
+[4]: https://developer.android.com/studio/command-line/adb
 [5]: https://github.com/google/adb-sync
 [6]: https://github.com/ytdl-org/youtube-dl#how-do-i-pass-cookies-to-youtube-dl

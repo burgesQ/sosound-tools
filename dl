@@ -10,38 +10,39 @@ SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 source $SCRIPTPATH/libs/sh_lib
 
 # static value
-LOG_PATH=$SCRIPTPATH/etc/logs/
+LOG_PATH=$SCRIPTPATH/etc/logs/dl/
 LOCK_DIR=/tmp/music_dl/dl/
-SYNC_LOCK_DIR=/tmp/music_dl/sync
+SYNC_LOCK_DIR=/tmp/music_dl/sync/
 
 # cli value
 YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
 DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
-YT_DL_ARGS="--config-location $YT_CONF_PATH"
 INSTALL=0
-MODE=0
+DL_MODE=0
+OUTPUT_MODE=0
 
 USAGE="
-Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -i -h
+Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -o [1..2] -i -h
 
 Run dl, a simple music downloader script.
 
 Configuration options :
 
-    -d:     root path for downloads. A full or relative path can be provide.
+    -d:     Directory root path for downloads. A full or relative path can be provide.
             Default : [$DL_PATH]
-    -c:     download configuration file path. A full path must be provide.
+    -c:     Configuration file for the download. A full path must be provide.
             Default : [$DL_CONF_PATH]
-    -y:     youtube-dl configuration file path. A full path must be provide.
+    -y:     Youtube-dl configuration file path. A full path must be provide.
             Default : [$YT_CONF_PATH]
-    -m:     mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
-            Default : [$MODE]
+    -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
+            Default : [$DL_MODE]
 
 Misc options :
 
     -l:     log level (0=error,1=info,2=warn,3=debug).
             Default : [$LEVEL]
+    -o:     Output mode. (0=logfile,1=std)
     -i:     install required packages
     -h:     display this screen
 "
@@ -91,9 +92,8 @@ download_from_sc_like() {
 # download (playlist/track) from youtube
 download_from_yt() {
     local url=$1
-    # add dl archive per file
-    pwd && sleep 10
-    # youtube-dl $YT_DL_ARGS "$url"
+    # add version at the beginning of the log file
+    youtube-dl --config-location $YT_CONF_PATH $url
 }
 
 #
@@ -118,16 +118,23 @@ downloader() {
     mkdir -p "$dl_path"
     touch "$dl_path/.downloaded"
 
+#    OUTPUT_DEST=" &> $log_file"
+
     cd "$dl_path"
-    if [ `echo $url | grep "youtube"` ] && ( [ $MODE -eq 0 ] || [ $MODE -eq 1 ] ); then
-        download_from_yt "$url" &> "$log_file".log
-    elif [ `echo $url | grep "soundcloud"` ] && ( [ $MODE -eq 0 ] || [ $MODE -eq 2 ] ); then
-        download_from_sc_like "$url" &> "$log_file"_like.log
-        download_from_sc_playlist "$url" &> "$log_file"_playlist.log
-    elif [ $MODE -eq 3 ]; then
-             sleep 10 # sleep 10 for tesst
+    if [ `echo $url | grep "youtube"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
+
+        if [ $DL_MODE -eq 0 ]; then download_from_yt "$url" &> "$log_file".log; else download_from_yt "$url"; fi
+
+    elif [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
+
+        if [ $DL_MODE -eq 0 ]; then
+            download_from_sc_like "$url" &> "$log_file"_like.log ; download_from_sc_playlist "$url" &> "$log_file"_playlist.log
+        else download_from_sc_like "$url" ; download_from_sc_playlist "$url"; fi
+
+    elif [ $DL_MODE -eq 3 ]; then
+        sleep 10 # sleep 10 for tesst
     else
-        warn "url schema not supported (mode=$MODE) : $url"
+        warn "url schema not supported (mode=$DL_MODE) : $url"
     fi
     cd - > /dev/null
 
@@ -152,7 +159,7 @@ wait_for_download() {
             break
         fi
         echo -n "."
-        sleep 1
+        sleep 10
     done
 }
 
@@ -202,7 +209,8 @@ setup() {
     log path :               $LOG_PATH
     download config file :   $DL_CONF_PATH
     youtube-dl config file : $YT_CONF_PATH
-    mode :                   $MODE
+    dl mode :                $DL_MODE
+    output mode :            $OUTPUT_MODE
     loglevel :               $LEVEL
 "
 
@@ -225,6 +233,7 @@ setup() {
     fi
 
     mkdir -p $LOCK_DIR
+    mkdir -p $LOG_PATH
 
     info "All okay let's process !"
 }
@@ -233,13 +242,16 @@ setup() {
 # main
 #
 
-while getopts "l:m:d:c:y:ih" o; do
+while getopts "l:m:d:c:y:o:ih" o; do
     case "${o}" in
         l)
             LEVEL=${OPTARG}
 	          ;;
         m)
-            MODE=${OPTARG}
+            DL_MODE=${OPTARG}
+            ;;
+        o)
+            OUTPUT_MODE=${OPTARG}
             ;;
         d)
             DL_PATH=${OPTARG}
@@ -268,7 +280,5 @@ if [ $INSTALL -eq 1 ]; then
     install_scdl && install_yt # && install_ffmpeg
     exit 0
 fi
-
-YT_DL_ARGS="--config-location $YT_CONF_PATH"
 
 setup && run
