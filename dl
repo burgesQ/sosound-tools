@@ -123,11 +123,11 @@ downloader() {
     cd "$dl_path"
     if [ `echo $url | grep "youtube"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
 
-        if [ $DL_MODE -eq 0 ]; then download_from_yt "$url" &> "$log_file".log; else download_from_yt "$url"; fi
+        if [ $OUTPUT_MODE -eq 0 ]; then download_from_yt "$url" &> "$log_file".log; else download_from_yt "$url"; fi
 
     elif [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
 
-        if [ $DL_MODE -eq 0 ]; then
+        if [ $OUTPUT_MODE -eq 0 ]; then
             download_from_sc_like "$url" &> "$log_file"_like.log ; download_from_sc_playlist "$url" &> "$log_file"_playlist.log
         else download_from_sc_like "$url" ; download_from_sc_playlist "$url"; fi
 
