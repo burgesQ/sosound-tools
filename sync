@@ -29,6 +29,7 @@ CONNECT_IP=0.0.0.0
 
 INSTALL=0
 
+# TODO: usage use \n \t and stuffs
 USAGE="
 Usage : sync -d [path] -s [path] -c [IP] -l [0..3] -i -h
 
@@ -52,26 +53,25 @@ Misc options :
     -h:     display this screen
 "
 
-# install adb-sync
+# TODO: install adb-sync
 
+#
+# Sync a directory sourced from the config file
+# with the one from the remote android device.
+#
 sync_dir() {
     local dir=$1
     local path="$DL_PATH/$dir"
 
-    # create lock
     touch $LOCK_DIR/$dir.lock
-    # echo "$path $TARGET_PATH"
     adb-sync -n  "$path" "$TARGET_PATH"
-    #    sleep#  10
-    # sync file 2>&1> log
     rm $LOCK_DIR/$dir.lock
-    # remove lock
 }
 
 #
 # Wait for all download to be complete.
 # All download are complete once the $LOCK_DIR/
-# directory is empty
+# directory is empty.
 #
 wait_for_sync() {
     info "Waiting for sync to finish"
@@ -80,12 +80,16 @@ wait_for_sync() {
         if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
             break
         fi
+        # TODO: some recap of removed files ?
         echo -n "."
         sleep 1
     done
 }
 
-# sync files
+#
+# Read the configuration file to extract
+# directories to sync on the remote android device.
+#
 run() {
     info "Syncing file with the android device : running ..."
 
@@ -110,18 +114,19 @@ run() {
     info "\nSyncing file with the android device : done."
 }
 
+#
+# Connect to the given android device
+# via adb tcpip.
+#
 connect() {
-    local set -e
-    # adb connect
     info "connecting to the android device"
+
     adb connect "$CONNECT_IP"
     if [ `adb devices | grep "$CONNECT_IP"`="" ]; then
         exit 6
     fi
 
     debug "adb-sync connected"
-
-    # or exit
 }
 
 #

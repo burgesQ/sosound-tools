@@ -26,7 +26,7 @@
 
 ** WIP sync utility [7/8] [87%]
    :LOGBOOK:
-   CLOCK: [2019-06-14 Fri 21:12]
+   CLOCK: [2019-06-14 Fri 21:12]--[2019-06-14 Mon 23:12] =>  2:00
    CLOCK: [2019-06-14 Fri 16:55]--[2019-06-14 Fri 17:14] =>  0:19
    :END:
 - [X] cli param [3/3] [100%]
@@ -45,9 +45,10 @@
 *** dl [0/0] [0%]
 *** sync [0/0] [0%]
 
-** Enhancement [0/1] [0%]
+** Enhancement [0/2] [0%]
 *** dl [0/0] [0%]
 *** sync [0/0] [0%]
 *** IDEA a wrapper  [0/2] [0%]
-- [ ] some cli management
-- [ ] a logging option ? 
+    - [ ] some cli management
+    - [ ] a logging option ?
+*** IDEA a simple api to access the scirpt ? [0/0] [0%]
