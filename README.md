@@ -76,7 +76,7 @@ The `dl.conf` file is a simple text file that container, on each line (terminate
 
 The name will be used to create a directory named after it and the music from the url will be downloaded inside.
 
-The following example will downloaexample the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
+The following example will download the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
 ```
 $ cat dl.conf
 YouTube https://www.youtube.com/watch?v=wYhwcsjkbiw&list=LL8BoiGKpm1cpDd_nvkMzdxw&index=24&t=0s
@@ -97,7 +97,7 @@ Again, the [youtube-dl documentation](6) get the things done.
 
 ### running download
 
-Assuming you either have your own `youtube-dl.conf`, `cookies.txt` and `dl.conf` **OR** that you are a lazy guys :
+Assuming you either have your own `youtube-dl.conf`, `cookies.txt` and `dl.conf` **OR** that you are a lazy guys (so just a simple `dl.conf` file) :
 
 ```bash
 $ dl -i
@@ -137,6 +137,25 @@ Misc options :
     -i:     install required packages
     -h:     display this screen
 ```
+
+### conf file
+
+#### `sync.fonc`
+
+The `sync.conf` file is a simple text file that container, on each line (terminated by a \n), the name of the directory to sync.
+
+The directory will be copied to the remote android device via `adb-sync`.
+
+The following example will sync the directory `YoutTubbe` into the android device:
+```
+$ cat sync.conf
+YouTube
+
+```
+
+Don't forget to add a return at the last line, otherwise the line won't be handled !
+
+you can use the `#` char to ignore a line.
 
 ### running sync
 
