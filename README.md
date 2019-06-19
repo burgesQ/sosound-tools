@@ -14,7 +14,7 @@
             - [youtube-dl.conf](#youtube-dlconf)
             - [cookies.txt](#cookiestxt)
         - [running download](#running-download)
-    - [sync](#sync)
+    - [`sync`](#sync)
         - [usage](#usage-1)
         - [running sync](#running-sync)
 
@@ -70,6 +70,8 @@ You can install the dependencies by running `dl -i`.
 
 ### config files
 
+The default one are used for testing are under `./etc/`
+
 #### dl.conf
 
 The `dl.conf` file is a simple text file that container, on each line (terminated by a \n), a name and a url.
@@ -78,7 +80,7 @@ The name will be used to create a directory named after it and the music from th
 
 The following example will download the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
 ```
-$ cat dl.conf
+$ cat ./etc/dl.conf
 YouTube https://www.youtube.com/watch?v=wYhwcsjkbiw&list=LL8BoiGKpm1cpDd_nvkMzdxw&index=24&t=0s
 
 ```
@@ -100,8 +102,11 @@ Again, the [youtube-dl documentation](6) get the things done.
 Assuming you either have your own `youtube-dl.conf`, `cookies.txt` and `dl.conf` **OR** that you are a lazy guys (so just a simple `dl.conf` file) :
 
 ```bash
+$ git clone github.com/burgesQ/music_helper
+$ cd music_helper
 $ dl -i
-$ dl -l 3
+$ # edit the ./etc/dl.conf according to your need
+$ dl -l 3 -d ./Music -c ./etc/dl.conf -y ./etc/youtube-dl.conf
 ```
 
 To update all youtube contente from a specific directory :
@@ -110,6 +115,9 @@ $ dl -l 3 -d "/media/master/dd/Music/" -m 1
 ```
 
 ## `sync`
+
+### TODO: test
+### TODO: usb/tcpip
 
 `sync` is a simple script that remotely connect to a android device and then synchronize the content of the local directory and the android remote one.
 
@@ -122,7 +130,7 @@ Run sync, a simple android sync script.
 
 Configuration options :
 
-    -d:     root path for root sync path. A full or relative path can be provide.
+    -d:     root path for root sync path. A full or relative path can be provide.<
             Default : [$DL_PATH]
     -c:     connect ip of the android device. Please be sure that the device support
             adb over tcpip.
@@ -160,7 +168,11 @@ you can use the `#` char to ignore a line.
 ### running sync
 
 ```bash
-$sync -l 3 -d "/media/master/dd/Music" -c 192.168.8.102
+$ git clone github.com/burgesQ/music_helper
+$ cd music_helper
+$ dl -i
+$ # edit the ./etc/sync.conf according to your need
+$ sync -l 3 -d ./Music -s ./etc/sync.conf -c <your android adb ip>
 ```
 
 [1]: https://github.com/flyingrub/scdl

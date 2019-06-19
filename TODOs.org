@@ -1,6 +1,7 @@
 #+TODO: IDEA TODO WIP | DONE CANCELED
 
 * musci_helper todo's
+# souSound v2
 
   Here is a summary of all ideas / task that have been done / will be done.
 
@@ -24,7 +25,7 @@
   - [X] conf file
   - [X] running
 
-** WIP sync utility [7/8] [87%]
+** WIP sync utility [7/9] [77%]
    :LOGBOOK:
    CLOCK: [2019-06-14 Fri 21:12]--[2019-06-14 Mon 23:12] =>  2:00
    CLOCK: [2019-06-14 Fri 16:55]--[2019-06-14 Fri 17:14] =>  0:19
@@ -40,21 +41,31 @@
 - [X] waiter ?
 - [X] logger
 - [ ] doc
+- [ ] tcpip/usb option [0/3] [0%]
+  - [ ] support tcpip
+  - [ ] support usb
+  - [ ] cli choice if none provide
+
+** Enhancement [0/5] [0%]
+*** dl [0/0] [0%]
+*** sync [0/0] [0%]
+*** IDEA a wrapper  [0/6] [0%]
+    - [ ] some cli management
+    - [ ] a logging option ?
+    - [ ] a api
+    - [ ] a front for the api
+    - [ ] a music streamer
+    - [ ] a music player
+*** IDEA a simple api to access the scirpt ? [0/0] [0%]
+*** IDEA check version of the deps ?
+*** IDEA sync / dl locked by dir ?
+*** IDEA return value from workers handled ?
+
+** testing - r&d
+*** dl
+*** diff
+*** new sync
 
 ** Fixes [0/0] [0%]
 *** dl [0/0] [0%]
 *** sync [0/0] [0%]
-
-** Enhancement [0/3] [0%]
-*** dl [0/0] [0%]
-*** sync [0/0] [0%]
-*** IDEA a wrapper  [0/2] [0%]
-    - [ ] some cli management
-    - [ ] a logging option ?
-*** IDEA a simple api to access the scirpt ? [0/0] [0%]
-*** IDEA versioning of the utilities ?
-
-** Process
-*** dl
-*** diff
-*** new sync

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# TODO: check return value from log file ?
+# TODO: 2 log file : ok.log/error.log ?
+
 # possible return value from the scirpt are :
 # 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided ; dl:  while sync
 
@@ -94,6 +97,7 @@ download_from_yt() {
     local url=$1
     # add version at the beginning of the log file
     youtube-dl --config-location $YT_CONF_PATH $url
+    echo -e "\n$?"
 }
 
 #
@@ -128,8 +132,8 @@ downloader() {
     elif [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
 
         if [ $OUTPUT_MODE -eq 0 ]; then
-            download_from_sc_like "$url" &> "$log_file"_like.log ; download_from_sc_playlist "$url" &> "$log_file"_playlist.log
-        else download_from_sc_like "$url" ; download_from_sc_playlist "$url"; fi
+            (download_from_sc_like "$url" &> "$log_file"_like.log &) ; download_from_sc_playlist "$url" &> "$log_file"_playlist.log
+        else (download_from_sc_like "$url" &) ; download_from_sc_playlist "$url"; fi
 
     elif [ $DL_MODE -eq 3 ]; then
         sleep 10 # sleep 10 for tesst
