@@ -18,8 +18,8 @@ source $SCRIPTPATH/libs/sh_lib
 
 # static value
 LOG_PATH=$SCRIPTPATH/etc/logs/sync/
-LOCK_DIR=/tmp/music_dl/sync/
-DL_LOCK_DIR=/tmp/music_dl/dl/
+LOCK_DIR=$SCRIPTPATH/etc/lock/sync/
+DL_LOCK_DIR=$SCRIPTPATH/etc/lock/dl/
 
 # cli value
 SYNC_CONF_PATH=$SCRIPTPATH/etc/sync.conf
@@ -61,11 +61,15 @@ Misc options :
 #
 sync_dir() {
     local dir=$1
+    local log_path=$2
     local path="$DL_PATH/$dir"
+    local lock_file="$LOCK_DIR$(basename $f).lock"
 
-    touch $LOCK_DIR/$dir.lock
-    adb-sync -n  "$path" "$TARGET_PATH"
-    rm $LOCK_DIR/$dir.lock
+    echo "trying lock $lock_file"
+    touch $lock_file
+    adb-sync -n "$path" "$TARGET_PATH" &> $log_path
+    rm $lock_file
+    debug "\nSync of $dir : done."
 }
 
 #
@@ -97,15 +101,15 @@ run() {
     local IFS=$'\n'
 
     while read f ; do
-        debug "Processing $f"
-
         if [[ "$f" =~ ^#.* ]]; then
-            warn "Entry ignored"
+            warn "$f : Entry ignored"
         else
-            local log_file="$LOG_PATH$f.log"
+            debug "Processing $f"
+            local log_file="$LOG_PATH$(basename $f).log"
+            echo "trying log $log_file"
             touch $log_file
             debug "Syncing $f ..."
-            (sync_dir $f &> $log_file) &
+            sync_dir $f $log_file &
         fi
     done < <(cat $SYNC_CONF_PATH)
 
@@ -122,7 +126,8 @@ connect() {
     info "connecting to the android device"
 
     adb connect "$CONNECT_IP"
-    if [ `adb devices | grep "$CONNECT_IP"`="" ]; then
+    ok=`adb devices | grep "$CONNECT_IP"`
+    if [ -z "$ok" ]; then
         exit 6
     fi
 
@@ -140,6 +145,7 @@ setup() {
     download path :          $DL_PATH
     target root path :       $TARGET_PATH
     log path :               $LOG_PATH
+    lock path :              $LOCK_DIR
     sync config file :       $SYNC_CONF_PATH
     connect ip address :     $CONNECT_IP
     loglevel :               $LEVEL

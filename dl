@@ -14,8 +14,8 @@ source $SCRIPTPATH/libs/sh_lib
 
 # static value
 LOG_PATH=$SCRIPTPATH/etc/logs/dl/
-LOCK_DIR=/tmp/music_dl/dl/
-SYNC_LOCK_DIR=/tmp/music_dl/sync/
+LOCK_DIR=$SCRIPTPATH/etc/lock/dl/
+SYNC_LOCK_DIR=$SCRIPTPATH/etc/lock/sync/
 
 # cli value
 YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
@@ -76,15 +76,15 @@ install_yt() {
 # download playlists from soundcloud
 download_from_sc_playlist() {
     local url=$1
-    pwd && sleep 7
-    # scdl -l "$url" -m -c --hide-progress --download-archive .scdl_playlist.txt;
+    # pwd && sleep 7
+    scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
 }
 
 # download likes from soundcloud
 download_from_sc_like() {
     local url=$1
-    pwd && sleep 7
-    # scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt;
+    # pwd && sleep 7
+    scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
 }
 
 #
@@ -96,7 +96,7 @@ download_from_sc_like() {
 download_from_yt() {
     local url=$1
     # add version at the beginning of the log file
-    youtube-dl --config-location $YT_CONF_PATH $url
+    youtube-dl --verbose --config-location $YT_CONF_PATH $url
     echo -e "\n$?"
 }
 
@@ -126,15 +126,16 @@ downloader() {
 
     cd "$dl_path"
     if [ `echo $url | grep "youtube"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
-
-        if [ $OUTPUT_MODE -eq 0 ]; then download_from_yt "$url" &> "$log_file".log; else download_from_yt "$url"; fi
-
-    elif [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
-
         if [ $OUTPUT_MODE -eq 0 ]; then
-            (download_from_sc_like "$url" &> "$log_file"_like.log &) ; download_from_sc_playlist "$url" &> "$log_file"_playlist.log
-        else (download_from_sc_like "$url" &) ; download_from_sc_playlist "$url"; fi
-
+            download_from_yt "$url" &> "$log_file".log;
+        else download_from_yt "$url";
+        fi
+    elif [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
+        if [ $OUTPUT_MODE -eq 0 ]; then
+            (download_from_sc_like "$url" ; download_from_sc_playlist "$url") &> "$log_file"_like.log
+        else
+            download_from_sc_like "$url" ; download_from_sc_playlist "$url"
+        fi
     elif [ $DL_MODE -eq 3 ]; then
         sleep 10 # sleep 10 for tesst
     else
@@ -142,7 +143,7 @@ downloader() {
     fi
     cd - > /dev/null
 
-    debug "Downloading $path stuffs : done."
+    debug "\nDownloading $path stuffs : done."
     rm $LOCK_DIR/$path
 }
 
@@ -163,7 +164,7 @@ wait_for_download() {
             break
         fi
         echo -n "."
-        sleep 10
+        sleep 5
     done
 }
 
@@ -179,11 +180,11 @@ run() {
     local IFS=$'\n'
 
     while read f ; do
-        debug "Processing $f"
-
         if [[ "$f" =~ ^#.* ]]; then
-            warn "Entry ignored"
+            warn "$f : Entry ignored"
         else
+            debug "Processing $f"
+
             local path=`echo "$f" | cut -d ' ' -f1`
             local url=`echo "$f" | cut -d ' ' -f2`
 
@@ -194,9 +195,10 @@ run() {
                 downloader $path $url &
             fi
         fi
+        sleep 1
     done < <(cat $DL_CONF_PATH)
 
-    sleep 1 && wait_for_download
+    sleep 10 && wait_for_download
 
     info "\nDownloading music files : done."
 }
@@ -211,6 +213,7 @@ setup() {
     debug "
     download path :          $DL_PATH
     log path :               $LOG_PATH
+    lock directory path :    $LOCK_DIR
     download config file :   $DL_CONF_PATH
     youtube-dl config file : $YT_CONF_PATH
     dl mode :                $DL_MODE

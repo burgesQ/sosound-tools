@@ -20,6 +20,7 @@
 
 <!-- markdown-toc end -->
 
+TODO: [enable adb over tcpip](7)
 
 ## what
 
@@ -181,3 +182,4 @@ $ sync -l 3 -d ./Music -s ./etc/sync.conf -c <your android adb ip>
 [4]: https://developer.android.com/studio/command-line/adb
 [5]: https://github.com/google/adb-sync
 [6]: https://github.com/ytdl-org/youtube-dl#how-do-i-pass-cookies-to-youtube-dl
+[7]: https://stackoverflow.com/questions/12251101/how-to-enable-adbd-to-listen-to-a-port-at-boot-time-in-android
