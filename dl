@@ -24,9 +24,11 @@ DL_PATH=$SCRIPTPATH/Music/
 INSTALL=0
 DL_MODE=0
 OUTPUT_MODE=0
+SHOW=0
+NEW_TARGET=
 
 USAGE="
-Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -o [1..2] -i -h
+Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -o [1..2] -a [\"NameOfTheTarget  http://url.to/download\"] -i -h -s
 
 Run dl, a simple music downloader script.
 
@@ -40,6 +42,8 @@ Configuration options :
             Default : [$YT_CONF_PATH]
     -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
             Default : [$DL_MODE]
+    -a:     Append url to the dl.conf file. Format is \"NameOfTheTarget http://url.to/download\"
+    -s:     Show url listed in the dl.conf file
 
 Misc options :
 
@@ -70,34 +74,30 @@ install_yt() {
 
 #
 # Soundcloud dl functions
-# They only use `echo` to facilitate loggin
 #
 
 # download playlists from soundcloud
 download_from_sc_playlist() {
     local url=$1
-    # pwd && sleep 7
     scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
 }
 
 # download likes from soundcloud
 download_from_sc_like() {
     local url=$1
-    # pwd && sleep 7
     scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
 }
 
 #
 # YouTube function
-# They only use `echo` to facilitate loggin
 #
 
 # download (playlist/track) from youtube
 download_from_yt() {
     local url=$1
-    # add version at the beginning of the log file
+    # add version at the beginning of the log file ?
     youtube-dl --verbose --config-location $YT_CONF_PATH $url
-    echo -e "\n$?"
+    echo -e "\n$?" # log return value
 }
 
 #
@@ -109,32 +109,33 @@ download_from_yt() {
 # handle the log / flag file; run the dl
 #
 downloader() {
-
     local path=$1
     local url=$2
 
     local dl_path=$DL_PATH$path
     local log_file=$LOG_PATH$path
+    # use of basename in case of [dir/subdir]
+    local lock_file="$LOCK_DIR$(basename $path).lock"
 
-    touch $LOCK_DIR$path
+    touch $lock_file
     info "Downloading $path stuffs : running ..."
 
     mkdir -p "$dl_path"
     touch "$dl_path/.downloaded"
 
-#    OUTPUT_DEST=" &> $log_file"
-
     cd "$dl_path"
-    if [ `echo $url | grep "youtube"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
-        if [ $OUTPUT_MODE -eq 0 ]; then
-            download_from_yt "$url" &> "$log_file".log;
-        else download_from_yt "$url";
-        fi
-    elif [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
+
+    if [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
         if [ $OUTPUT_MODE -eq 0 ]; then
             (download_from_sc_like "$url" ; download_from_sc_playlist "$url") &> "$log_file"_like.log
         else
             download_from_sc_like "$url" ; download_from_sc_playlist "$url"
+        fi
+    elif [ `echo $url | grep "youtube"` ] || ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
+        if [ $OUTPUT_MODE -eq 0 ]; then
+            download_from_yt "$url" &> "$log_file".log;
+        else
+            download_from_yt "$url";
         fi
     elif [ $DL_MODE -eq 3 ]; then
         sleep 10 # sleep 10 for tesst
@@ -143,8 +144,8 @@ downloader() {
     fi
     cd - > /dev/null
 
-    debug "\nDownloading $path stuffs : done."
-    rm $LOCK_DIR/$path
+    echo -ne "\e[93m[$path : done]\e[0m"
+    rm $lock_file
 }
 
 #
@@ -168,6 +169,13 @@ wait_for_download() {
     done
 }
 
+prettyPrintEntry() {
+    local path=`echo "$1" | cut -d ' ' -f1`
+    local url=`echo "$1" | cut -d ' ' -f2`
+
+    info "Target: $path -- Source: $url"
+}
+
 #
 # Read the download configuration file ;
 # run the download if needed and then wait
@@ -180,13 +188,15 @@ run() {
     local IFS=$'\n'
 
     while read f ; do
-        if [[ "$f" =~ ^#.* ]]; then
+        if [ $SHOW -eq 1 ]; then
+            prettyPrintEntry "$f"
+        elif [[ "$f" =~ ^#.* ]]; then
             warn "$f : Entry ignored"
         else
-            debug "Processing $f"
-
             local path=`echo "$f" | cut -d ' ' -f1`
             local url=`echo "$f" | cut -d ' ' -f2`
+
+            debug "Processing $path"
 
             if [ -z "$url" ] || [ -z "$path" ]; then
                 error "Invalid value in the download configuration file for ($path):[$url]"
@@ -195,10 +205,10 @@ run() {
                 downloader $path $url &
             fi
         fi
-        sleep 1
+        sleep 0.1
     done < <(cat $DL_CONF_PATH)
 
-    sleep 10 && wait_for_download
+    sleep 0.5 && wait_for_download
 
     info "\nDownloading music files : done."
 }
@@ -218,6 +228,8 @@ setup() {
     youtube-dl config file : $YT_CONF_PATH
     dl mode :                $DL_MODE
     output mode :            $OUTPUT_MODE
+    new target :             $NEW_TARGET
+    show url :               $SHOW
     loglevel :               $LEVEL
 "
 
@@ -239,21 +251,33 @@ setup() {
         exit 4
     fi
 
+    info "updating youtube-dl ..."
+    sudo youtube-dl --update
+
+    if [ ! -z "$NEW_TARGET" ]; then
+        echo -e "$NEW_TARGET" >> $DL_CONF_PATH
+        exit 0
+    fi
+
     mkdir -p $LOCK_DIR
     mkdir -p $LOG_PATH
-
-    info "All okay let's process !"
 }
 
 #
 # main
 #
 
-while getopts "l:m:d:c:y:o:ih" o; do
+# TODO: comment entry
+# TODO: remove entry
+
+while getopts "l:a:m:d:c:y:o:ish" o; do
     case "${o}" in
         l)
             LEVEL=${OPTARG}
 	          ;;
+        a)
+            NEW_TARGET=${OPTARG}
+            ;;
         m)
             DL_MODE=${OPTARG}
             ;;
@@ -271,6 +295,9 @@ while getopts "l:m:d:c:y:o:ih" o; do
             ;;
         i)
             INSTALL=1
+            ;;
+        s)
+            SHOW=1
             ;;
 	      h)
 	          usage "$USAGE"

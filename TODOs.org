@@ -25,7 +25,8 @@
   - [X] conf file
   - [X] running
 
-** WIP sync utility [7/9] [77%]
+** DONE sync utility [7/9] [77%]
+   CLOSED: [2019-08-12 Mon 10:47]
    :LOGBOOK:
    CLOCK: [2019-06-14 Fri 21:12]--[2019-06-14 Mon 23:12] =>  2:00
    CLOCK: [2019-06-14 Fri 16:55]--[2019-06-14 Fri 17:14] =>  0:19
@@ -46,26 +47,28 @@
   - [ ] support usb
   - [ ] cli choice if none provide
 
-** Enhancement [0/5] [0%]
-*** dl [0/0] [0%]
-*** sync [0/0] [0%]
-*** IDEA a wrapper  [0/6] [0%]
-    - [ ] some cli management
-    - [ ] a logging option ?
+** Enhancement [2/5] [40%]
+*** IDEA a wrapper  [3/7] [42%]
+    - [X] a logging option ?
     - [ ] a api
     - [ ] a front for the api
     - [ ] a music streamer
     - [ ] a music player
+    - [X] cli append url
+    - [X] cli list url
 *** IDEA a simple api to access the scirpt ? [0/0] [0%]
 *** IDEA check version of the deps ?
-*** IDEA sync / dl locked by dir ?
-*** IDEA return value from workers handled ?
+*** DONE sync / dl locked by dir ?
+    CLOSED: [2019-08-12 Mon 10:48]
+*** DONE return value from workers handled ?
+    CLOSED: [2019-08-12 Mon 10:48]
 
 ** testing - r&d
 *** dl
 *** diff
-*** new sync
 
 ** Fixes [0/0] [0%]
-*** dl [0/0] [0%]
-*** sync [0/0] [0%]
+*** dl [0/1] [0%]
+    - [ ] some cli management to comment / uncomment ?
+*** sync [0/1] [0%]
+    - [ ] sync stop at the first file ..

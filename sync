@@ -61,15 +61,17 @@ Misc options :
 #
 sync_dir() {
     local dir=$1
-    local log_path=$2
-    local path="$DL_PATH/$dir"
-    local lock_file="$LOCK_DIR$(basename $f).lock"
 
-    echo "trying lock $lock_file"
-    touch $lock_file
-    adb-sync -n "$path" "$TARGET_PATH" &> $log_path
-    rm $lock_file
-    debug "\nSync of $dir : done."
+    local racine=`basename $dir`
+    local path="$DL_PATH/$dir"
+    local log_file="$LOG_PATH$(basename $dir).log"
+    local lock_file="$LOCK_DIR$(basename $dir).lock"
+
+    debug "[$lock_file]/[$log_file]"
+
+    touch $lock_file && touch $log_file
+    sleep 4 #adb-sync -n "$path" "$TARGET_PATH" &> $log_file
+    echo -ne "\e[93m[Sync of $dir : done]\e[0m" && rm $lock_file
 }
 
 #
@@ -86,7 +88,7 @@ wait_for_sync() {
         fi
         # TODO: some recap of removed files ?
         echo -n "."
-        sleep 1
+        sleep 5
     done
 }
 
@@ -104,16 +106,13 @@ run() {
         if [[ "$f" =~ ^#.* ]]; then
             warn "$f : Entry ignored"
         else
-            debug "Processing $f"
-            local log_file="$LOG_PATH$(basename $f).log"
-            echo "trying log $log_file"
-            touch $log_file
             debug "Syncing $f ..."
-            sync_dir $f $log_file &
+            sync_dir $f &
         fi
+        sleep 0.1
     done < <(cat $SYNC_CONF_PATH)
 
-    sleep 1 && wait_for_sync
+    sleep 0.5 && wait_for_sync
 
     info "\nSyncing file with the android device : done."
 }
@@ -128,6 +127,7 @@ connect() {
     adb connect "$CONNECT_IP"
     ok=`adb devices | grep "$CONNECT_IP"`
     if [ -z "$ok" ]; then
+        error "can't run adb connect [$CONNECT_IP], are you sure that you are in tcpip mode ?"
         exit 6
     fi
 
@@ -169,7 +169,7 @@ setup() {
         error "Cannot sync while downloading"
         exit 4
     elif (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
-        error "Cannot sync while syncing"
+        error "A sync process is already running"
         exit 5
     fi
 
