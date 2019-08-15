@@ -1,0 +1,75 @@
+#!/bin/bash
+
+DL_MODE=0
+YT_CONF_PATH=
+
+#
+# Misc
+#
+
+# install scdl if needed
+install_scdl() {
+    exit_if_not_installed "pip3"
+    pip3 install scdl
+    info "scdl (a soundcloud downloader) installed"
+}
+
+# install youtube-dl
+install_yt() {
+    exit_if_not_installed "curl"
+    sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
+    sudo chmod a+rx /usr/local/bin/youtube-dl
+    info "youtube-dl (a youtube dowmloader) installed"
+}
+
+#
+# Soundcloud functions
+#
+
+# define if the url has to be dl via scdl
+is_soundcloud() {
+    local url=$1
+    if [ `echo $url | grep "soundcloud"` ] &&
+           ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+# download playlists from soundcloud
+download_from_sc_playlist() {
+    local url=$1
+    scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
+    echo $?
+}
+
+# download likes from soundcloud
+download_from_sc_like() {
+    local url=$1
+    scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
+    echo $?
+}
+
+#
+# YouTube function
+#
+
+# download (playlist/track) from youtube
+download_from_yt() {
+    local url=$1
+    # add version at the beginning of the log file ?
+    youtube-dl --verbose --config-location $YT_CONF_PATH $url
+    echo $?
+}
+
+# define if the url has to be dl via youtube-dl
+is_youtube() {
+    local url=$1
+    if [ `echo $url | grep "youtube"` ] &&
+           ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
+        echo 1
+    else
+        echo 0
+    fi
+}

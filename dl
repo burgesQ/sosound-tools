@@ -2,9 +2,7 @@
 
 : '
 TODO :
-- check return value from log file ?
 - 2 log file : ok.log/error.log ?
-- ctrl+c kill all child + rm lock files
 '
 
 : '
@@ -14,12 +12,16 @@ TODO :
  - 2 : required package are not present
  - 3 : invalid path provided
  - 4 : dl while sync
+ - 5 : dl while dl
 '
 
 # fetch script path for import
 # https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+# import libs
 source $SCRIPTPATH/libs/sh_lib
+source $SCRIPTPATH/libs/dl_lib
 
 # static value
 LOG_PATH=$SCRIPTPATH/etc/logs/dl/
@@ -31,37 +33,9 @@ YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
 DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
 INSTALL=0
-DL_MODE=0
 OUTPUT_MODE=0
 SHOW=0
 NEW_TARGET=
-
-USAGE="
-Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -o [1..2] -a [\"NameOfTheTarget  http://url.to/download\"] -i -h -s
-
-Run dl, a simple music downloader script.
-
-Configuration options :
-
-    -d:     Directory root path for downloads. A full or relative path can be provide.
-            Default : [$DL_PATH]
-    -c:     Configuration file for the download. A full path must be provide.
-            Default : [$DL_CONF_PATH]
-    -y:     Youtube-dl configuration file path. A full path must be provide.
-            Default : [$YT_CONF_PATH]
-    -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
-            Default : [$DL_MODE]
-    -a:     Append url to the dl.conf file. Format is \"NameOfTheTarget http://url.to/download\"
-    -s:     Show url listed in the dl.conf file
-
-Misc options :
-
-    -l:     log level (0=error,1=info,2=warn,3=debug).
-            Default : [$LEVEL]
-    -o:     Output mode. (0=logfile,1=std)
-    -i:     install required packages
-    -h:     display this screen
-"
 
 #
 # Misc
@@ -83,49 +57,24 @@ function ctrl_c() {
     exit 0
 }
 
-# install scdl if needed
-install_scdl() {
-    exit_if_not_installed "pip3"
-    pip3 install scdl
-    info "scdl (a soundcloud downloader) installed"
-}
+# list entry in conf file
+pretty_print_entry() {
+    local path=`echo "$1" | cut -d ' ' -f1`
+    local url=`echo "$1" | cut -d ' ' -f2`
+    local ignore="false"
 
-# install youtube-dl
-install_yt() {
-    exit_if_not_installed "curl"
-    sudo curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl
-    sudo chmod a+rx /usr/local/bin/youtube-dl
-    info "youtube-dl (a youtube dowmloader) installed"
+    if [ "$path" == "#" ]; then
+        ignored="true"
+        path=$url
+        url=`echo "$1" | cut -d ' ' -f3`
+    fi
+
+    info "Target: $path -- Source: $url (ingored: $ingored)"
 }
 
 #
 # Soundcloud functions
 #
-
-# download playlists from soundcloud
-download_from_sc_playlist() {
-    local url=$1
-    scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
-    echo $?
-}
-
-# download likes from soundcloud
-download_from_sc_like() {
-    local url=$1
-    scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
-    echo $?
-}
-
-# define if the url has to be dl via scdl
-is_soundcloud() {
-    local url=$1
-    if [ `echo $url | grep "soundcloud"` ] &&
-           ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
-        echo 1
-    else
-        echo 0
-    fi
-}
 
 # handle the log logic / running of scdl
 handle_soundcloud() {
@@ -144,25 +93,6 @@ handle_soundcloud() {
 #
 # YouTube function
 #
-
-# download (playlist/track) from youtube
-download_from_yt() {
-    local url=$1
-    # add version at the beginning of the log file ?
-    youtube-dl --verbose --config-location $YT_CONF_PATH $url
-    echo $?
-}
-
-# define if the url has to be dl via youtube-dl
-is_youtube() {
-    local url=$1
-    if [ `echo $url | grep "youtube"` ] &&
-           ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
-        echo 1
-    else
-        echo 0
-    fi
-}
 
 # handle the log logic / running of youtube-dl
 handle_youtube() {
@@ -219,10 +149,10 @@ downloader() {
     rm $lock_file
 }
 
-: '
- Wait for all download to be complete.
- All download are complete once the $LOCK_DIR/  directory is empty
-'
+#
+# Wait for all download to be complete.
+# All download are complete once the $LOCK_DIR/  directory is empty
+#
 wait_for_download() {
     info "Waiting for downlaod to finish"
     while true
@@ -235,19 +165,6 @@ wait_for_download() {
         fi
         sleep 5
     done
-}
-
-# helpful for debug
-pretty_print_entry() {
-    local path=`echo "$1" | cut -d ' ' -f1`
-    local url=`echo "$1" | cut -d ' ' -f2`
-
-    if [ "$path" == "#" ]; then
-        path=$url
-        url=`echo "$1" | cut -d ' ' -f3`
-    fi
-
-    info "Target: $path -- Source: $url"
 }
 
 # process entry
