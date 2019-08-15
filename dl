@@ -324,16 +324,13 @@ setup() {
     check_if_file_exist "$YT_CONF_PATH" "youtube-dl configuration file"
     check_if_file_exist "$DL_CONF_PATH" "download configuration file"
 
-    if (find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+    if [ "`find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .`" == "1"  ]; then
         error "Cannot dl while syncing"
         exit 4
+    elif [ "`ls -l $LOCK_DIR/ | wc -l`" != "1" ]; then
+        error "A dl process is already running"
+        exit 5
     fi
-
-    # FIXME: doesn't work ...
-    # if (find $DL_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
-    #     error "A dl process is locking the directory"
-    #     exit 4
-    # fi
 
     info "updating youtube-dl ..."
     sudo youtube-dl --update
