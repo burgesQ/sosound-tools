@@ -1,15 +1,24 @@
 #!/bin/bash
 
-# TODO: check return value from log file ?
-# TODO: 2 log file : ok.log/error.log ?
+: '
+TODO :
+- check return value from log file ?
+- 2 log file : ok.log/error.log ?
+- ctrl+c kill all child + rm lock files
+'
 
-# possible return value from the scirpt are :
-# 0 : all ok ; 1 : cli opt ; 2 : required package are not present ; 3 : invalid path provided ; dl:  while sync
+: '
+ Possible return value from the scirpt are :
+ - 0 : all ok
+ - 1 : cli opt
+ - 2 : required package are not present
+ - 3 : invalid path provided
+ - 4 : dl while sync
+'
 
 # fetch script path for import
 # https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
-
 source $SCRIPTPATH/libs/sh_lib
 
 # static value
@@ -64,6 +73,7 @@ install_scdl() {
     pip3 install scdl
     info "scdl (a soundcloud downloader) installed"
 }
+
 # install youtube-dl
 install_yt() {
     exit_if_not_installed "curl"
@@ -80,12 +90,14 @@ install_yt() {
 download_from_sc_playlist() {
     local url=$1
     scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
+    echo $?
 }
 
 # download likes from soundcloud
 download_from_sc_like() {
     local url=$1
     scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
+    echo $?
 }
 
 #
@@ -97,23 +109,75 @@ download_from_yt() {
     local url=$1
     # add version at the beginning of the log file ?
     youtube-dl --verbose --config-location $YT_CONF_PATH $url
-    echo -e "\n$?" # log return value
+    echo $?
 }
 
 #
 # Global function
 #
 
-#
-# Process the argument; create the dl dir;
-# handle the log / flag file; run the dl
-#
+# define if the url has to be dl via scdl
+is_soundcloud() {
+    local url=$1
+    if [ `echo $url | grep "soundcloud"` ] &&
+           ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+# define if the url has to be dl via youtube-dl
+is_youtube() {
+    local url=$1
+    if [ `echo $url | grep "youtube"` ] &&
+           ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
+        echo 1
+    else
+        echo 0
+    fi
+}
+
+# handle the log logic / running of scdl
+handle_soundcloud() {
+    path=$1
+    url=$2
+    local log_file="$LOG_PATH$(basename $path)"
+
+    if [ $OUTPUT_MODE -eq 0 ]; then
+        (echo -e "scld : $path\n" ; download_from_sc_like "$url") &> "$log_file"_like.log
+        (echo -e "scdl : $path\n" ; download_from_sc_playlist "$url") &> "$log_file"_playlist.log
+    else
+        download_from_sc_like "$url" ; download_from_sc_playlist "$url"
+    fi
+}
+
+# handle the log logic / running of youtube-dl
+handle_youtube() {
+    path=$1
+    url=$2
+    local ret
+    local log_file="$LOG_PATH$(basename $path)"
+
+    if [ $OUTPUT_MODE -eq 0 ]; then
+        (echo -e "youtube-dl : $path\n" ; download_from_yt "$url") &> "$log_file".log
+        ret=`cat $log_file.log | tail -n 1`
+    else
+        ret=`download_from_yt "$url"`
+    fi
+
+    if [ "$ret" != "0" ]; then
+        error "Error while downloading $path - please check the logs"
+    fi
+}
+
+: '
+ Process the argument; create the dl dir;
+'
 downloader() {
     local path=$1
     local url=$2
-
     local dl_path=$DL_PATH$path
-    local log_file=$LOG_PATH$path
     # use of basename in case of [dir/subdir]
     local lock_file="$LOCK_DIR$(basename $path).lock"
 
@@ -122,41 +186,34 @@ downloader() {
 
     mkdir -p "$dl_path"
     touch "$dl_path/.downloaded"
+    pre_cout=`ls -l $dl_path | wc -l`
 
     cd "$dl_path"
-
-    if [ `echo $url | grep "soundcloud"` ] && ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 2 ] ); then
-        if [ $OUTPUT_MODE -eq 0 ]; then
-            (download_from_sc_like "$url" ; download_from_sc_playlist "$url") &> "$log_file"_like.log
-        else
-            download_from_sc_like "$url" ; download_from_sc_playlist "$url"
-        fi
-    elif [ `echo $url | grep "youtube"` ] || ( [ $DL_MODE -eq 0 ] || [ $DL_MODE -eq 1 ] ); then
-        if [ $OUTPUT_MODE -eq 0 ]; then
-            download_from_yt "$url" &> "$log_file".log;
-        else
-            download_from_yt "$url";
-        fi
+    if [ `is_soundcloud "$url"` == "1" ] ; then
+        handle_soundcloud $path "$url"
+    elif [ `is_youtube "$url"` == "1" ]; then
+        handle_youtube $path "$url"
     elif [ $DL_MODE -eq 3 ]; then
-        sleep 10 # sleep 10 for tesst
+        sleep 5 # sleep 10 for test
     else
         warn "url schema not supported (mode=$DL_MODE) : $url"
     fi
     cd - > /dev/null
 
-    echo -ne "\e[93m[$path : done]\e[0m"
+    post_cout=`ls -l $dl_path | wc -l`
+    echo -ne "\e[93m[$path : done | pre : $pre_cout -- post : $post_cout]\e[0m"
     rm $lock_file
 }
 
-#
-# Main logic function (checking - running - waiting)
-#
+: '
+ Main logic function (checking - running - waiting)
+'
 
-#
-# Wait for all download to be complete.
-# All download are complete once the $LOCK_DIR/
-# directory is empty
-#
+: '
+ Wait for all download to be complete.
+ All download are complete once the $LOCK_DIR/
+ directory is empty
+'
 wait_for_download() {
     info "Waiting for downlaod to finish"
     while true
@@ -164,16 +221,38 @@ wait_for_download() {
         if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
             break
         fi
-        echo -n "."
+        if [ $OUTPUT_MODE -eq 0 ]; then
+            echo -n "."
+        fi
         sleep 5
     done
 }
 
-prettyPrintEntry() {
+pretty_print_entry() {
     local path=`echo "$1" | cut -d ' ' -f1`
     local url=`echo "$1" | cut -d ' ' -f2`
 
+    if [ "$path" == "#" ]; then
+        path=$url
+        url=`echo "$1" | cut -d ' ' -f3`
+    fi
+
     info "Target: $path -- Source: $url"
+}
+
+handle_dl() {
+    local entry=$1
+    local path=`echo "$entry" | cut -d ' ' -f1`
+    local url=`echo "$entry" | cut -d ' ' -f2`
+
+    debug "Processing $path"
+
+    if [ -z "$url" ] || [ -z "$path" ]; then
+        error "Invalid value in the download configuration file for ($path):[$url]"
+        warn "Skipping"
+    else
+        downloader $path $url &
+    fi
 }
 
 #
@@ -189,21 +268,11 @@ run() {
 
     while read f ; do
         if [ $SHOW -eq 1 ]; then
-            prettyPrintEntry "$f"
+            pretty_print_entry "$f"
         elif [[ "$f" =~ ^#.* ]]; then
             warn "$f : Entry ignored"
         else
-            local path=`echo "$f" | cut -d ' ' -f1`
-            local url=`echo "$f" | cut -d ' ' -f2`
-
-            debug "Processing $path"
-
-            if [ -z "$url" ] || [ -z "$path" ]; then
-                error "Invalid value in the download configuration file for ($path):[$url]"
-                warn "Skipping"
-            else
-                downloader $path $url &
-            fi
+            handle_dl "$f"
         fi
         sleep 0.1
     done < <(cat $DL_CONF_PATH)
@@ -250,6 +319,12 @@ setup() {
         error "Cannot dl while syncing"
         exit 4
     fi
+
+    # FIXME: doesn't work ...
+    # if (find $DL_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+    #     error "A dl process is locking the directory"
+    #     exit 4
+    # fi
 
     info "updating youtube-dl ..."
     sudo youtube-dl --update

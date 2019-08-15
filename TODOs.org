@@ -25,7 +25,8 @@
   - [X] conf file
   - [X] running
 
-** DONE sync utility [7/9] [77%]
+
+** DONE sync utility [8/9] [88%]
    CLOSED: [2019-08-12 Mon 10:47]
    :LOGBOOK:
    CLOCK: [2019-06-14 Fri 21:12]--[2019-06-14 Mon 23:12] =>  2:00
@@ -41,13 +42,14 @@
 - [X] sync
 - [X] waiter ?
 - [X] logger
-- [ ] doc
+- [X] doc
 - [ ] tcpip/usb option [0/3] [0%]
   - [ ] support tcpip
   - [ ] support usb
   - [ ] cli choice if none provide
 
-** Enhancement [2/5] [40%]
+
+** Enhancement [3/5] [60%]
 *** IDEA a wrapper  [3/7] [42%]
     - [X] a logging option ?
     - [ ] a api
@@ -57,15 +59,13 @@
     - [X] cli append url
     - [X] cli list url
 *** IDEA a simple api to access the scirpt ? [0/0] [0%]
-*** IDEA check version of the deps ?
+*** DONE check version of the deps ?
+    CLOSED: [2019-08-14 Wed 14:28]
 *** DONE sync / dl locked by dir ?
     CLOSED: [2019-08-12 Mon 10:48]
 *** DONE return value from workers handled ?
     CLOSED: [2019-08-12 Mon 10:48]
 
-** testing - r&d
-*** dl
-*** diff
 
 ** Fixes [0/0] [0%]
 *** dl [0/1] [0%]
