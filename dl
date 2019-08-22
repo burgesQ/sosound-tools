@@ -3,6 +3,7 @@
 : '
 TODO :
 - 2 log file : ok.log/error.log ?
+- (un)comment entries in dl conf file
 '
 
 : '
@@ -28,14 +29,10 @@ LOG_PATH=$SCRIPTPATH/etc/logs/dl/
 LOCK_DIR=$SCRIPTPATH/etc/lock/dl/
 SYNC_LOCK_DIR=$SCRIPTPATH/etc/lock/sync/
 
-# cli value
+# default cli value
 YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
 DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
-INSTALL=0
-OUTPUT_MODE=0
-SHOW=0
-NEW_TARGET=
 
 #
 # Misc
@@ -48,12 +45,12 @@ trap ctrl_c INT
 function ctrl_c() {
     info "** Trapped CTRL-C"
     info "killing child..."
-    debug "[-] scdl"
-    (killall scdl ; sleep 1) &> /dev/null
-    debug "[-] youtube-dl"
-    (killall youtube-dl ; sleep 1) &> /dev/null
-    debug "removing lock files"
-    rm -rf "$LOCK_DIR*"
+    info "[-] scdl"
+    (killall scdl) &> /dev/null
+    info "[-] youtube-dl"
+    (killall youtube-dl) &> /dev/null
+    info "[-] removing lock files"
+    rm -rf "$LOCK_DIR/*"
     exit 0
 }
 
@@ -61,7 +58,7 @@ function ctrl_c() {
 pretty_print_entry() {
     local path=`echo "$1" | cut -d ' ' -f1`
     local url=`echo "$1" | cut -d ' ' -f2`
-    local ignore="false"
+    local ignored="false"
 
     if [ "$path" == "#" ]; then
         ignored="true"
@@ -69,7 +66,7 @@ pretty_print_entry() {
         url=`echo "$1" | cut -d ' ' -f3`
     fi
 
-    info "Target: $path -- Source: $url (ingored: $ingored)"
+    info "Target: $path -- Source: $url (ingored: $ignored)"
 }
 
 #
@@ -208,6 +205,44 @@ run() {
     info "\nDownloading music files : done."
 }
 
+change_state_target() {
+    local uncomment=`grep "^# $ENTRY" "$DL_CONF_PATH"`
+    local comment=`grep "^$ENTRY" "$DL_CONF_PATH"`
+
+    if [ -z "$comment" ] && [ -z "$uncomment" ]; then
+        error "No entry $target found - please double check the command line"
+    elif [ -z "$comment" ]; then
+        local uncomment="s/^# $ENTRY/$ENTRY/g"
+        sed -i -e "$uncomment" $DL_CONF_PATH
+        info "Entry $ENTRY uncommented"
+    else
+        local comment="s/^$ENTRY/# $ENTRY/g"
+        sed -i -e "$comment" $DL_CONF_PATH
+        info "Entry $ENTRY commented"
+    fi
+}
+
+# list the target in the conf file
+show_them_all() {
+    # make newlines the only separator
+    local IFS=$'\n'
+
+    while read f ; do
+        pretty_print_entry "$f"
+    done < <(cat $DL_CONF_PATH)
+}
+
+# check if no other dl/sync process are running
+check_running() {
+    if [ "`find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .`" == "1"  ]; then
+        error "Cannot dl while syncing"
+        exit 4
+    elif [ "`ls -l $LOCK_DIR/ | wc -l`" != "1" ]; then
+        error "A dl process is already running"
+        exit 5
+    fi
+}
+
 #
 # Perform some check relative to the binaries
 # and the path used into the script
@@ -215,18 +250,9 @@ run() {
 setup() {
     info "Running a few checks ..."
 
-    debug "
-    download path :          $DL_PATH
-    log path :               $LOG_PATH
-    lock directory path :    $LOCK_DIR
-    download config file :   $DL_CONF_PATH
-    youtube-dl config file : $YT_CONF_PATH
-    dl mode :                $DL_MODE
-    output mode :            $OUTPUT_MODE
-    new target :             $NEW_TARGET
-    show url :               $SHOW
-    loglevel :               $LEVEL
-"
+    check_running
+
+    debug $RUNNING_INFO
 
     prgs=('scdl' 'youtube-dl' 'ffmpeg')
     for prg in "${prgs[@]}"
@@ -241,47 +267,43 @@ setup() {
     check_if_file_exist "$YT_CONF_PATH" "youtube-dl configuration file"
     check_if_file_exist "$DL_CONF_PATH" "download configuration file"
 
-    if [ "`find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .`" == "1"  ]; then
-        error "Cannot dl while syncing"
-        exit 4
-    elif [ "`ls -l $LOCK_DIR/ | wc -l`" != "1" ]; then
-        error "A dl process is already running"
-        exit 5
-    fi
-
     info "updating youtube-dl ..."
     sudo youtube-dl --update
 
+    mkdir -p $LOCK_DIR
+    mkdir -p $LOG_PATH
+}
+
+pre() {
+    if [ $INSTALL -eq 1 ]; then
+        install_scdl && install_yt # && install_ffmpeg
+        exit 0
+    fi
+
     if [ ! -z "$NEW_TARGET" ]; then
+        check_if_file_exist "$DL_CONF_PATH" "download configuration file"
         echo -e "$NEW_TARGET" >> $DL_CONF_PATH
         exit 0
     fi
 
-    mkdir -p $LOCK_DIR
-    mkdir -p $LOG_PATH
+    if [ ! -z "$ENTRY" ]; then
+        check_if_file_exist "$DL_CONF_PATH" "download configuration file"
+        change_state_target
+        exit 0
+    fi
+
+    if [ $SHOW -eq 1 ]; then
+        show_them_all
+        exit 0
+    fi
 }
 
 #
 # main
 #
 
-# TODO: comment entry
-# TODO: remove entry
-
-while getopts "l:a:m:d:c:y:o:ish" o; do
+while getopts "l:a:m:d:c:y:o:r:ish" o; do
     case "${o}" in
-        l)
-            LEVEL=${OPTARG}
-	          ;;
-        a)
-            NEW_TARGET=${OPTARG}
-            ;;
-        m)
-            DL_MODE=${OPTARG}
-            ;;
-        o)
-            OUTPUT_MODE=${OPTARG}
-            ;;
         d)
             DL_PATH=${OPTARG}
             ;;
@@ -291,11 +313,26 @@ while getopts "l:a:m:d:c:y:o:ish" o; do
         y)
             YT_CONF_PATH=${OPTARG}
             ;;
-        i)
-            INSTALL=1
+        m)
+            DL_MODE=${OPTARG}
             ;;
         s)
             SHOW=1
+            ;;
+        a)
+            NEW_TARGET=${OPTARG}
+            ;;
+        r)
+            ENTRY=${OPTARG}
+            ;;
+        l)
+            LEVEL=${OPTARG}
+	          ;;
+        o)
+            OUTPUT_MODE=${OPTARG}
+            ;;
+        i)
+            INSTALL=1
             ;;
 	      h)
 	          usage "$USAGE"
@@ -308,9 +345,4 @@ while getopts "l:a:m:d:c:y:o:ish" o; do
     esac
 done
 
-if [ $INSTALL -eq 1 ]; then
-    install_scdl && install_yt # && install_ffmpeg
-    exit 0
-fi
-
-setup && run
+pre && setup && run

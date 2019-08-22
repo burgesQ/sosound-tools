@@ -49,7 +49,7 @@
   - [ ] cli choice if none provide
 
 
-** Enhancement [3/5] [60%]
+** Enhancement [3/6] [50%]
 *** IDEA a wrapper  [3/7] [42%]
     - [X] a logging option ?
     - [ ] a api
@@ -66,9 +66,13 @@
 *** DONE return value from workers handled ?
     CLOSED: [2019-08-12 Mon 10:48]
 
+*** WIP dl [3/4] [75%]
+    - [ ] some cli management to comment / uncomment ?
+    - [X] ctrl + c
+    - [X] error if dl has some fail
+    - [X] recap for number of file
+
 
 ** Fixes [0/0] [0%]
-*** dl [0/1] [0%]
-    - [ ] some cli management to comment / uncomment ?
 *** sync [0/1] [0%]
     - [ ] sync stop at the first file ..
