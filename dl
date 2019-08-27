@@ -3,7 +3,6 @@
 : '
 TODO :
 - 2 log file : ok.log/error.log ?
-- (un)comment entries in dl conf file
 '
 
 : '
@@ -34,6 +33,9 @@ YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
 DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
 
+# array of workers pids
+WORKERS=()
+
 #
 # Misc
 #
@@ -41,21 +43,8 @@ DL_PATH=$SCRIPTPATH/Music/
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 
-# handle ^+c
-function ctrl_c() {
-    info "** Trapped CTRL-C"
-    info "killing child..."
-    info "[-] scdl"
-    (killall scdl) &> /dev/null
-    info "[-] youtube-dl"
-    (killall youtube-dl) &> /dev/null
-    info "[-] removing lock files"
-    rm -rf "$LOCK_DIR/*"
-    exit 0
-}
-
 # list entry in conf file
-pretty_print_entry() {
+pretty_print_entry() { 
     local path=`echo "$1" | cut -d ' ' -f1`
     local url=`echo "$1" | cut -d ' ' -f2`
     local ignored="false"
@@ -177,7 +166,26 @@ handle_dl() {
         warn "Skipping"
     else
         downloader $path $url &
+        local last_pid=$!
+        WORKERS+=("$last_pid")
     fi
+}
+
+# handle ^+c
+function ctrl_c() {
+    info "\n\n** Trapped CTRL-C"
+    info "killing child..."
+    pkill youtube-dl
+    pkill scdl
+    sleep 0.1
+    pkill scdl
+    for entry in "${WORKERS[@]}"; do
+        kill $entry &> /dev/null
+    done
+    sleep 1
+    info "\n[-] removing lock files"
+    rm -rf $LOCK_DIR/*
+    exit 0
 }
 
 #
@@ -205,6 +213,7 @@ run() {
     info "\nDownloading music files : done."
 }
 
+# comment or uncommnent a target entry
 change_state_target() {
     local uncomment=`grep "^# $ENTRY" "$DL_CONF_PATH"`
     local comment=`grep "^$ENTRY" "$DL_CONF_PATH"`
