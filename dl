@@ -37,6 +37,59 @@ DL_PATH=$SCRIPTPATH/Music/
 WORKERS=()
 
 #
+# var for usage / debug
+#
+
+RUNNING_INFO="
+    download path :          $DL_PATH
+    download config file :   $DL_CONF_PATH
+    youtube-dl config file : $YT_CONF_PATH
+
+    log path :               $LOG_PATH
+    lock directory path :    $LOCK_DIR
+
+    dl mode :                $DL_MODE (0=all,1=youtube,2=soundcloud,3=disable_dl)
+    output mode :            $OUTPUT_MODE (0=logfile,1=std)
+    loglevel :               $LEVEL (0=error,1=info,2=warn,3=debug)
+
+    new target :             $NEW_TARGET
+    show url :               $SHOW
+    comment entry :          $TO_COMMENT
+"
+
+USAGE="
+Usage : dl -d [path] -c [path] -y [path] -m [0..3] -s -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
+
+Run dl, a simple music downloader script.
+
+Download configuration options :
+
+    -d:     Directory root path for downloads. A full or relative path can be provide.
+            Default : [$DL_PATH]
+    -c:     Configuration file for the download. A full path must be provide.
+            Default : [$DL_CONF_PATH]
+    -y:     Youtube-dl configuration file path. A full path must be provide.
+            Default : [$YT_CONF_PATH]
+    -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
+            Default : [$DL_MODE]
+
+Configuration options :
+
+    -s:     Show the entry in the config file
+    -a:     Append entry to the config file.
+            Argument must be in format [EntryDirectory EntryURL]
+    -r:     Comment/Uncomment a entry from the config file.
+            Argument must be in format [EntryDirectory]
+
+Misc options :
+    -l:     log level (0=error,1=info,2=warn,3=debug).
+            Default : [$LEVEL]
+    -o:     Output mode. (0=logfile,1=std)
+    -i:     install required packages
+    -h:     display this screen
+"
+
+#
 # Misc
 #
 
@@ -44,7 +97,7 @@ WORKERS=()
 trap ctrl_c INT
 
 # list entry in conf file
-pretty_print_entry() { 
+pretty_print_entry() {
     local path=`echo "$1" | cut -d ' ' -f1`
     local url=`echo "$1" | cut -d ' ' -f2`
     local ignored="false"
@@ -176,10 +229,10 @@ function ctrl_c() {
     info "\n\n** Trapped CTRL-C"
     info "killing child..."
     pkill youtube-dl
-    pkill scdl
+    pkill scdl # killing scdl twice as the process successively launch it 2 times
     sleep 0.1
     pkill scdl
-    for entry in "${WORKERS[@]}"; do
+    for entry in "${WORKERS[@]}"; do # kill remaining workers
         kill $entry &> /dev/null
     done
     sleep 1
