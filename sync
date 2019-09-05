@@ -64,13 +64,16 @@ sync_dir() {
 
     local racine=`basename $dir`
     local path="$DL_PATH/$dir"
-    local log_file="$LOG_PATH$(basename $dir).log"
-    local lock_file="$LOCK_DIR$(basename $dir).lock"
+    local log_file="$LOG_PATH$racine.log"
+    local lock_file="$LOCK_DIR$racine.lock"
+
 
     debug "[$lock_file]/[$log_file]"
-
     touch $lock_file && touch $log_file
-    sleep 4 #adb-sync -n "$path" "$TARGET_PATH" &> $log_file
+
+    # sleep cause adb-sync is in some way block the process
+    sleep 2
+    adb-sync -n "$path" "$TARGET_PATH" &> $log_file
     echo -ne "\e[93m[Sync of $dir : done]\e[0m" && rm $lock_file
 }
 
@@ -92,6 +95,8 @@ wait_for_sync() {
     done
 }
 
+WORKERS=()
+
 #
 # Read the configuration file to extract
 # directories to sync on the remote android device.
@@ -105,9 +110,12 @@ run() {
     while read f ; do
         if [[ "$f" =~ ^#.* ]]; then
             warn "$f : Entry ignored"
-        else
+        elif [[ ! -z "$f" ]]; then
             debug "Syncing $f ..."
             sync_dir $f &
+            local last_pid=$!
+            WORKERS+=("$last_pid")
+            echo "${WORKERS[@]}"
         fi
         sleep 0.1
     done < <(cat $SYNC_CONF_PATH)
@@ -115,6 +123,25 @@ run() {
     sleep 0.5 && wait_for_sync
 
     info "\nSyncing file with the android device : done."
+}
+
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+# handle ^+c
+function ctrl_c() {
+    info "\n\n** Trapped CTRL-C"
+    info "killing child..."
+    pkill adb-sync
+    sleep 0.1
+    for entry in "${WORKERS[@]}"; do # kill remaining workers
+        kill $entry &> /dev/null
+    done
+    sleep 1
+    info "\n[-] removing remaning lock files"
+    ls $LOCK_DIR/
+    rm -rf $LOCK_DIR/*
+    exit 0
 }
 
 #
