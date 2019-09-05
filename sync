@@ -68,9 +68,7 @@ sync_dir() {
     local lock_file="$LOCK_DIR$racine.lock"
 
 
-    debug "[$lock_file]/[$log_file]"
     touch $lock_file && touch $log_file
-
     # sleep cause adb-sync is in some way block the process
     sleep 2
     adb-sync -n "$path" "$TARGET_PATH" &> $log_file
@@ -115,7 +113,6 @@ run() {
             sync_dir $f &
             local last_pid=$!
             WORKERS+=("$last_pid")
-            echo "${WORKERS[@]}"
         fi
         sleep 0.1
     done < <(cat $SYNC_CONF_PATH)
