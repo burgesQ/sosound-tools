@@ -1,9 +1,71 @@
-#+TODO: IDEA TODO WIP | DONE CANCELED
+#+TITLE: music_helper todo's
+#+DESCRIPTION: This is an exaustiv list of todo's for the music_helper solution
+#+AUTHOR: Quentin Burgess quentin.burgess@frafos.com
 
-* musci_helper todo's
-# souSound v2
+This is the legendary SouSound ; release candidate 2
 
-  Here is a summary of all ideas / task that have been done / will be done.
+* v1.2
+
+** Enhancement [0/4] [0%]
+*** TODO wrapper [0/1] [0%]
+    - [ ] logging option
+*** TODO sync [0/2] [0%]
+    - [ ] cli add dir
+      - [ ] cli rm dir
+      - [ ] cli list dir
+    - [ ] tcpip/usb option [0/3] [0%]
+      - [ ] support tcpip
+      - [ ] support usb
+      - [ ] cli choice if none provide
+*** TODO dl [/] [%]
+*** IDEA a simple api to access the scirpt ? [0/2] [0%]
+    - [ ] api
+    - [ ] front api
+      - [ ] music streamer
+      - [ ] music player
+
+
+** a better doc [0/4] [0%]
+*** TODO dl [0/3] [0%]
+- [ ] args 
+- [ ] compat 
+- [ ] error management
+*** TODO sync [0/3] [0%]
+- [ ] args 
+- [ ] compat 
+- [ ] error management
+*** TODO wrapper
+*** IDEA quick start 
+
+* v1.1
+
+** Enhancement [5/5] [100%]
+*** DONE wrapper  [2/10] [20%]
+    CLOSED: [2019-09-05 Thu 15:15]
+    - [X] cli append url
+    - [X] cli list url
+*** DONE check version of the deps ?
+    CLOSED: [2019-08-14 Wed 14:28]
+*** DONE sync / dl locked by dir ?
+    CLOSED: [2019-08-12 Mon 10:48]
+*** DONE return value from workers handled ?
+    CLOSED: [2019-08-12 Mon 10:48]
+
+*** DONE dl [4/4] [100%]
+    CLOSED: [2019-09-05 Thu 15:16]
+    - [X] some cli management to comment / uncomment ?
+    - [X] ctrl + c
+    - [X] error if dl has some fail
+    - [X] recap for number of file
+
+
+** Fixes [1/1] [100%]
+*** DONE sync [1/1] [100%]
+    CLOSED: [2019-09-05 Thu 15:14]
+    - [X] sync stop at the first file ..
+
+
+* v1
 
 ** DONE dl utility [8/8] [100%]
    CLOSED: [2019-06-14 Fri 16:45]
@@ -26,7 +88,7 @@
   - [X] running
 
 
-** DONE sync utility [8/9] [88%]
+** DONE sync utility [8/8] [100%]
    CLOSED: [2019-08-12 Mon 10:47]
    :LOGBOOK:
    CLOCK: [2019-06-14 Fri 21:12]--[2019-06-14 Mon 23:12] =>  2:00
@@ -43,36 +105,3 @@
 - [X] waiter ?
 - [X] logger
 - [X] doc
-- [ ] tcpip/usb option [0/3] [0%]
-  - [ ] support tcpip
-  - [ ] support usb
-  - [ ] cli choice if none provide
-
-
-** Enhancement [3/6] [50%]
-*** IDEA a wrapper  [3/7] [42%]
-    - [X] a logging option ?
-    - [ ] a api
-    - [ ] a front for the api
-    - [ ] a music streamer
-    - [ ] a music player
-    - [X] cli append url
-    - [X] cli list url
-*** IDEA a simple api to access the scirpt ? [0/0] [0%]
-*** DONE check version of the deps ?
-    CLOSED: [2019-08-14 Wed 14:28]
-*** DONE sync / dl locked by dir ?
-    CLOSED: [2019-08-12 Mon 10:48]
-*** DONE return value from workers handled ?
-    CLOSED: [2019-08-12 Mon 10:48]
-
-*** WIP dl [3/4] [75%]
-    - [ ] some cli management to comment / uncomment ?
-    - [X] ctrl + c
-    - [X] error if dl has some fail
-    - [X] recap for number of file
-
-
-** Fixes [0/0] [0%]
-*** sync [0/1] [0%]
-    - [ ] sync stop at the first file ..
