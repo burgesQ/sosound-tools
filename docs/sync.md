@@ -1,6 +1,19 @@
-# sync  
+# sync
 
-### TODO: test
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [sync](#sync)
+    - [-](#-)
+    - [TODO: usb/tcpip](#todo-usbtcpip)
+    - [usage](#usage)
+    - [conf file](#conf-file)
+        - [`sync.fonc`](#syncfonc)
+        - [running sync](#running-sync)
+
+<!-- markdown-toc end -->
+
+TODO: test
 ### TODO: usb/tcpip
 
 `sync` is a simple script that remotely connect to a android device and then synchronize the content of the local directory and the android remote one.

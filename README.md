@@ -8,6 +8,7 @@
     - [requirement](#requirement)
     - [`dl`](#dl)
     - [`sync`](#sync)
+    - [`wrapper`](#wrapper)
 
 <!-- markdown-toc end -->
 
@@ -17,29 +18,38 @@ TODO: [enable adb over tcpip](7)
 
 Some bash script that download music and sync them to a remote android device.
 
-| script          | what                           |
-| :-:             | :-:                            |
-| [`dl`](#dl)     | utility used to download Music |
-| [`sync`](#sync) | utility used to sync Music     |
+| script                | what                                 |
+| :-:                   | :-:                                  |
+| [`dl`](#dl)           | utility used to download Music       |
+| [`sync`](#sync)       | utility used to sync Music           |
+| [`wrapper`](#wrapper) | utility used to run `dl` then `sync` |
 
 ## requirement
 
-You'll need, to download : 
+You'll need to have those package installed on your system :
+
+To download :
+
 - [scdl](1), 
 - [youtube-dl](2), 
 - [ffmpeg](3) (which is a deps from yt-dl),
 
 To sync :
+
 - [adb](4)
 - [adb-sync](5).
 
 ## `dl`
 
-refer to ./docs/dl.md
+Go to ./docs/dl.md
 
 ## `sync`
 
-refer to ./docs/dl.md
+Go to ./docs/sync.md
+
+## `wrapper`
+
+Go to ./docs/wrapper.nd
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl

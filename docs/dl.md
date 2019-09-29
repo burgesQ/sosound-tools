@@ -1,6 +1,6 @@
 # dl
 
-`dl` is a simple utility that  download content from YouTube or SoundCloud.
+`dl` is a simple utility that download tracks from YouTube or SoundCloud.
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
@@ -16,29 +16,36 @@
 
 <!-- markdown-toc end -->
 
-
 ## usage
 
 ```bash
-Usage : dl -d [path] -c [path] -y [path] -m [0..3] -l [0..3] -i -h
+Usage : dl -d [path] -c [path] -y [path] -m [0..3] -s -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
 
 Run dl, a simple music downloader script.
 
-Configuration options :
+Download configuration options :
 
-    -d:     root path for downloads. A full or relative path can be provide.
+    -d:     Directory root path for downloads. A full or relative path can be provide.
             Default : [/home/master/repo/perso/music_helper/Music/]
-    -c:     download configuration file path. A full path must be provide.
+    -c:     Configuration file for the download. A full path must be provide.
             Default : [/home/master/repo/perso/music_helper/etc/dl.conf]
-    -y:     youtube-dl configuration file path. A full path must be provide.
+    -y:     Youtube-dl configuration file path. A full path must be provide.
             Default : [/home/master/repo/perso/music_helper/etc/youtube-dl.conf]
-    -m:     mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
+    -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
             Default : [0]
 
-Misc options :
+Configuration options :
 
+    -s:     Show the entry in the config file
+    -a:     Append entry to the config file.
+            Argument must be in format [EntryDirectory EntryURL]
+    -r:     Comment/Uncomment a entry from the config file.
+            Argument must be in format [EntryDirectory]
+
+Misc options :
     -l:     log level (0=error,1=info,2=warn,3=debug).
             Default : [2]
+    -o:     Output mode. (0=logfile,1=std)
     -i:     install required packages
     -h:     display this screen
 ```
@@ -46,19 +53,20 @@ Misc options :
 ## deps
 
 You can install the dependencies by running `dl -i`. The dependencies are :
+
 - [scdl](1), 
 - [youtube-dl](2), 
 - [ffmpeg](3) (which is a deps from yt-dl),
 
 ## config files
 
-The default one are used for testing is under `./etc/`
+The one used by default are  is located under the `./etc/` directory.
 
 ### dl.conf
 
 The `dl.conf` file is a simple text file that container, on each line (terminated by an `\n`), a name and a url.
 
-The name will be used to create a directory named after it and the music from the url will be downloaded from there.
+The name will be used to create a directory named after it and the music from the url will be downloaded in there.
 
 The following example will download the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
 ```
@@ -75,13 +83,17 @@ Every line begging with a `#` will be ignored.
 
 The [youtube-dl documentation](2) is what you're looking for.
 
+In summary, allow to download track & playslist from youtube and other 
+
 ### cookies.txt
 
 Again, the [youtube-dl documentation](6) get the things done.
 
+Used to connect yourself to your youtube account.
+
 ## running `dl`
 
-Assuming you either have your own `youtube-dl.conf`, `cookies.txt` and `dl.conf` **OR** that you are a lazy guys (so just a simple `dl.conf` file) :
+Assuming you either have your own `youtube-dl.conf`, `cookies.txt` and `dl.conf` **OR** that you are a lazy guys (so just a simple `dl.conf` file + the default config) :
 
 ```bash
 $ git clone github.com/burgesQ/music_helper
