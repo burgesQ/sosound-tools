@@ -28,6 +28,11 @@ Some bash script that download music and sync them to a remote android device.
 
 You'll need to have those package installed on your system :
 
+The [`sh_lib`](6) on your system - or you need to recurse the submodule of the project :
+```bash
+$ git submdule update --init --recusrive
+```
+
 To download :
 
 - [scdl](1), 
@@ -56,3 +61,4 @@ Go to ./docs/wrapper.nd
 [3]: https://ffmpeg.org/
 [4]: https://developer.android.com/studio/command-line/adb
 [5]: https://github.com/google/adb-sync
+[6]: http://github.com/burgesQ/sh_lib

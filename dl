@@ -20,7 +20,10 @@ TODO :
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
 # import libs
-source $SCRIPTPATH/libs/sh_lib
+source sh_lib
+if [ $? -ne 0 ]; then
+    source $SCRIPTPATH/sh_lib/sh_lib
+fi
 source $SCRIPTPATH/libs/dl_lib
 
 # static value

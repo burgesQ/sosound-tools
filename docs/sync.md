@@ -14,7 +14,7 @@
 <!-- markdown-toc end -->
 
 TODO: test
-### TODO: usb/tcpip
+TODO: usb/tcpip
 
 `sync` is a simple script that remotely connect to a android device and then synchronize the content of the local directory and the android remote one.
 

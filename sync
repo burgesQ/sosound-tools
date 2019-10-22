@@ -14,7 +14,10 @@
 # https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
 SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
 
-source $SCRIPTPATH/libs/sh_lib
+source sh_lib
+if [ $? -ne 0 ]; then
+    source $SCRIPTPATH/sh_lib/sh_lib
+fi
 
 # static value
 LOG_PATH=$SCRIPTPATH/etc/logs/sync/

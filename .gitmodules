@@ -1,0 +1,3 @@
+[submodule "sh_lib"]
+	path = sh_lib
+	url = https://github.com/burgesQ/sh_lib
