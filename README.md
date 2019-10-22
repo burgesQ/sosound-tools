@@ -61,4 +61,4 @@ Go to ./docs/wrapper.nd
 [3]: https://ffmpeg.org/
 [4]: https://developer.android.com/studio/command-line/adb
 [5]: https://github.com/google/adb-sync
-[6]: http://github.com/burgesQ/sh_lib
+[6]: https://github.com/burgesQ/sh_lib
