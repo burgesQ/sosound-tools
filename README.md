@@ -12,7 +12,7 @@
 
 <!-- markdown-toc end -->
 
-TODO: [enable adb over tcpip](7)
+TODO: [enable adb over tcpip][7]
 
 ## what
 
@@ -35,14 +35,14 @@ $ git submdule update --init --recusrive
 
 To download :
 
-- [scdl][1], 
-- [youtube-dl](2), 
-- [ffmpeg](3) (which is a deps from yt-dl),
+- [scdl][1]
+- [youtube-dl][2],
+- [ffmpeg][3] (which is a deps from yt-dl)
 
 To sync :
 
-- [adb](4)
-- [adb-sync](5).
+- [adb][4]
+- [adb-sync][5]
 
 ## `dl`
 
@@ -62,3 +62,4 @@ Go to ./docs/wrapper.nd
 [4]: https://developer.android.com/studio/command-line/adb
 [5]: https://github.com/google/adb-sync
 [6]: https://github.com/burgesQ/sh_lib
+[7]: https://stackoverflow.com/questions/2604727/how-can-i-connect-to-android-with-adb-over-tcp
