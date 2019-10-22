@@ -28,14 +28,14 @@ Some bash script that download music and sync them to a remote android device.
 
 You'll need to have those package installed on your system :
 
-The [`sh_lib`](6) on your system - or you need to recurse the submodule of the project :
+The [`sh_lib`][6] on your system - or you need to recurse the submodule of the project :
 ```bash
 $ git submdule update --init --recusrive
 ```
 
 To download :
 
-- [scdl](1), 
+- [scdl][1], 
 - [youtube-dl](2), 
 - [ffmpeg](3) (which is a deps from yt-dl),
 
