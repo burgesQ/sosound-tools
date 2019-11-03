@@ -1,0 +1,96 @@
+#!/bin/bash
+
+: '
+ Possible return value from the scirpt are :
+ - 0 : all ok
+ - 1 : cli opt
+'
+# fetch script path for import
+# https://stackoverflow.com/questions/4774054/reliable-way-for-a-bash-script-to-get-the-full-path-to-itself
+SCRIPTPATH="$( cd "$(dirname "$0")" ; pwd -P )"
+
+# import libs
+source sh_lib
+if [ $? -ne 0 ]; then
+    source $SCRIPTPATH/sh_lib/sh_lib
+fi
+source $SCRIPTPATH/libs/mp3_lib
+
+BATCH=0
+DKO_PATH=./Music/DKO
+
+USAGE="
+Usage : convert_DKO -l [0..3] -b -h
+
+Fill DKO track id3 tags.
+
+    -l:     log level (0=error,1=info,2=warn,3=debug).
+            Default : [$LEVEL]
+    -b:     batch mode. Operate the change without prompt.
+            Default : [$BATCH]
+    -h:     display this screen
+    -p:     path to DKO track.
+            Default : [$DKO_PATH]
+"
+
+loop() {
+
+    local path=$1
+
+    for musicPath in $path/*.mp3; do
+        music=`basename "$musicPath" .mp3`
+        ARTIST=`echo $music | awk -F " - " '{print $1}'`
+        TITLE=`echo $music | awk -F " - " '{print $2}'`
+        DATE=`date -r "$musicPath" "+%Y"`
+        ALBUM=""
+        COVER=""
+        META=""
+
+        echo "
+[$musicPath] -->
+Title  : [$TITLE]
+Artist : [$ARTIST]
+Album  : [$ALBUM]
+Year   : [$DATE]
+Cover  : [$COVER]
+Meta   : [$META]
+Number : DKO
+"
+
+        if [ $BATCH -eq 0 ]; then
+            echo "Operate changes ? (Y/n)"
+            read query
+        fi
+
+        if [[ $BATCH -eq 1 ]] || [[ "$query" == "" || "$query" == "y" || "$query" == "Y" ]]; then
+            debug "Processing $TITLE..."
+            set_artist "$musicPath" "$ARTIST"
+            set_title "$musicPath" "$TITLE"
+            set_date "$musicPath" "$DATE"
+        fi
+    done
+}
+
+while getopts "l:bp:h" o; do
+    case "${o}" in
+        l)
+            LEVEL=${OPTARG}
+            ;;
+        b)
+            BATCH=1
+            ;;
+        p)
+            DKO_PATH==${OPTARG}
+            ;;
+        h)
+            usage "$USAGE"
+            exit 0
+            ;;
+        *)
+            usage "$USAGE"
+            exit 1
+            ;;
+    esac
+done
+
+loop "$DKO_PATH"
