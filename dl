@@ -36,6 +36,8 @@ YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
 DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
 DL_PATH=$SCRIPTPATH/Music/
 
+YT_UPT=.yt_updated
+
 # array of workers pids
 WORKERS=()
 
@@ -332,8 +334,11 @@ setup() {
     check_if_file_exist "$YT_CONF_PATH" "youtube-dl configuration file"
     check_if_file_exist "$DL_CONF_PATH" "download configuration file"
 
-    info "updating youtube-dl ..."
-    sudo youtube-dl --update
+    if [ ! -f $YT_UPT ] || [ `find "$YT_UPT" -mmin +120` ]; then
+        info "updating youtube-dl ..."
+        sudo youtube-dl --update
+        rm -f $YT_UPT && touch $YT_UPT
+    fi
 
     mkdir -p $LOCK_DIR
     mkdir -p $LOG_PATH
