@@ -19,14 +19,16 @@ if [ $? -ne 0 ]; then
     source $SCRIPTPATH/sh_lib/sh_lib
 fi
 
+CFG_PATH=$HOME/.config/music_helper
+
 # static value
-LOG_PATH=$SCRIPTPATH/etc/logs/sync/
-LOCK_DIR=$SCRIPTPATH/etc/lock/sync/
-DL_LOCK_DIR=$SCRIPTPATH/etc/lock/dl/
+LOG_PATH=$CFG_PATH/logs/sync/
+LOCK_DIR=$CFG_PATH/lock/sync/
+DL_LOCK_DIR=$CFG_PATH/lock/dl/
 
 # cli value
-SYNC_CONF_PATH=$SCRIPTPATH/etc/sync.conf
-DL_PATH=$SCRIPTPATH/Music/
+SYNC_CONF_PATH=$CFG_PATH/sync.conf
+SRC_PATH=$HOME/Music/
 TARGET_PATH=/sdcard/Music/
 CONNECT_IP=0.0.0.0
 
@@ -41,7 +43,7 @@ Run sync, a simple android sync script.
 Configuration options :
 
     -d:     root path for root sync path. A full or relative path can be provide.
-            Default : [$DL_PATH]
+            Default : [$SRC_PATH]
     -c:     connect ip of the android device. Please be sure that the device support
             adb over tcpip.
             Default : [$CONNECT_IP]
@@ -66,7 +68,7 @@ sync_dir() {
     local dir=$1
 
     local racine=`basename $dir`
-    local path="$DL_PATH/$dir"
+    local path="$SRC_PATH/$dir"
     local log_file="$LOG_PATH$racine.log"
     local lock_file="$LOCK_DIR$racine.lock"
 
@@ -161,6 +163,10 @@ connect() {
     debug "adb-sync connected"
 }
 
+install_adb-sync() {
+
+}
+
 #
 # Perform some check relative to the binaries
 # and the path used into the script
@@ -189,7 +195,7 @@ setup() {
         exit 5
     fi
 
-    check_if_dir_exist "$DL_PATH" "download root path"
+    check_if_dir_exist "$SRC_PATH" "download root path"
     check_if_file_exist "$SYNC_CONF_PATH" "sync configuration file"
 
     if (find $DL_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
@@ -205,32 +211,37 @@ setup() {
     info "All okay let's process !"
 }
 
+
+
 #
 # main
 #
 
-while getopts "l:c:d:ih" o; do
+while getopts "l:c:d:inh" o; do
     case "${o}" in
         l)
             LEVEL=${OPTARG}
-	          ;;
+            ;;
         c)
             CONNECT_IP=${OPTARG} # TODO doc
             ;;
         d)
-            DL_PATH=${OPTARG}
+            SRC_PATH=${OPTARG}
             ;;
         i)
             INSTALL=1
             ;;
-	      h)
-	          usage "$USAGE"
+        n)
+            COLOR=1
+            ;;
+        h)
+            usage "$USAGE"
             exit 0
-	          ;;
-	      *)
-	          usage "$USAGE"
-	          exit 1
-	          ;;
+            ;;
+        *)
+            usage "$USAGE"
+            exit 1
+            ;;
     esac
 done
 
