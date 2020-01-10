@@ -77,7 +77,12 @@ sync_dir() {
     # sleep cause adb-sync is in some way block the process
     sleep 2
     adb-sync -n "$path" "$TARGET_PATH" &> $log_file
-    echo -ne "\e[93m[Sync of $dir : done]\e[0m" && rm $lock_file
+    content="[Sync of $dir : done]"
+    if [ $COLOR -eq 0 ]; then
+        content="\e[93m$content\e[0m"
+    fi
+
+    echo -ne "$content" && rm $lock_file
 }
 
 #

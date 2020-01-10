@@ -271,11 +271,9 @@ downloader() {
 
     post_cout=`ls -l $dl_path | wc -l`
 
-    content=
+    content="[$path : done | pre : $pre_cout -- post : $post_cout]"
     if [ $COLOR -eq 0 ]; then
-        content="\e[93m[$path : done | pre : $pre_cout -- post : $post_cout]\e[0m"
-    else
-        content="[$path : done | pre : $pre_cout -- post : $post_cout]"
+        content="\e[93m$content\e[0m"
     fi
     echo -ne "$content"
 
