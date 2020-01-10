@@ -164,7 +164,7 @@ connect() {
 }
 
 install_adb-sync() {
-
+    echo "pls go see there : https://github.com/google/adb-sync#setup"
 }
 
 #
