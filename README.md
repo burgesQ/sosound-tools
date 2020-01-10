@@ -6,6 +6,9 @@
 - [README.md](#readmemd)
     - [what](#what)
     - [requirement](#requirement)
+        - [global](#global)
+        - [for ``dl`](#for-dl)
+        - [for `sync`](#for-sync)
     - [`dl`](#dl)
     - [`sync`](#sync)
     - [`wrapper`](#wrapper)
@@ -18,43 +21,45 @@ TODO: [enable adb over tcpip][7]
 
 Some bash script that download music and sync them to a remote android device.
 
-| script                | what                                 |
-| :-:                   | :-:                                  |
-| [`dl`](#dl)           | utility used to download Music       |
-| [`sync`](#sync)       | utility used to sync Music           |
-| [`wrapper`](#wrapper) | utility used to run `dl` then `sync` |
+| script                | what                 |
+| :-:                   | :-:                  |
+| [`dl`](#dl)           | download music       |
+| [`sync`](#sync)       | sync file            |
+| [`wrapper`](#wrapper) | run `dl` then `sync` |
 
 ## requirement
 
 You'll need to have those package installed on your system :
 
-The [`sh_lib`][6] on your system - or you need to recurse the submodule of the project :
+### global
+
+[`sh_lib`][6] (which is a submodule of this project) :
 ```bash
 $ git submdule update --init --recusrive
 ```
 
-To download :
+### for ``dl`
 
 - [scdl][1]
 - [youtube-dl][2],
-- [ffmpeg][3] (which is a deps from yt-dl)
+- [ffmpeg][3]
 
-To sync :
+### for `sync`
 
 - [adb][4]
 - [adb-sync][5]
 
 ## `dl`
 
-Go to ./docs/dl.md
+`./docs/dl.md`
 
 ## `sync`
 
-Go to ./docs/sync.md
+`./docs/sync.md`
 
 ## `wrapper`
 
-Go to ./docs/wrapper.nd
+`./docs/wrapper.md`
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl

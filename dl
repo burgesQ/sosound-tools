@@ -26,17 +26,19 @@ if [ $? -ne 0 ]; then
 fi
 source $SCRIPTPATH/libs/dl_lib
 
+CFG_PATH=$HOME/.config/music_helper
+
 # static value
-LOG_PATH=$SCRIPTPATH/etc/logs/dl/
-LOCK_DIR=$SCRIPTPATH/etc/lock/dl/
-SYNC_LOCK_DIR=$SCRIPTPATH/etc/lock/sync/
+LOG_PATH=$CFG_PATH/logs/dl/
+LOCK_DIR=$CFG_PATH/lock/dl/
+SYNC_LOCK_DIR=$CFG_PATH/lock/sync/
 
 # default cli value
-YT_CONF_PATH=$SCRIPTPATH/etc/youtube-dl.conf
-DL_CONF_PATH=$SCRIPTPATH/etc/dl.conf
-DL_PATH=$SCRIPTPATH/Music/
+YT_CONF_PATH=$CFG_PATH/youtube-dl.conf
+DL_CONF_PATH=$CFG_PATH/dl.conf
+DL_PATH=$HOME/Music/
 
-YT_UPT=.yt_updated
+YT_UPT=$CFG_PATH/.yt_updated
 
 # array of workers pids
 WORKERS=()
@@ -63,7 +65,7 @@ RUNNING_INFO="
 "
 
 USAGE="
-Usage : dl -d [path] -c [path] -y [path] -m [0..3] -s -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
+Usage : dl -d [path] -c [path] -y [path] -m [0..3] -s -n -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
 
 Run dl, a simple music downloader script.
 
@@ -92,6 +94,7 @@ Misc options :
     -o:     Output mode. (0=logfile,1=std)
     -i:     install required packages
     -h:     display this screen
+    -n:     diable the color output
 "
 
 #
@@ -182,6 +185,7 @@ downloader() {
     elif [ `is_youtube "$url"` == "1" ]; then
         handle_youtube $path "$url"
     elif [ $DL_MODE -eq 3 ]; then
+        debug "($$) sleeping 5 seconds"
         sleep 5 # sleep 10 for test
     else
         warn "url schema not supported (mode=$DL_MODE) : $url"
@@ -189,7 +193,15 @@ downloader() {
     cd - > /dev/null
 
     post_cout=`ls -l $dl_path | wc -l`
-    echo -ne "\e[93m[$path : done | pre : $pre_cout -- post : $post_cout]\e[0m"
+
+    content=
+    if [ $COLOR -eq 0 ]; then
+        content="\e[93m[$path : done | pre : $pre_cout -- post : $post_cout]\e[0m"
+    else
+        content="[$path : done | pre : $pre_cout -- post : $post_cout]"
+    fi
+    echo -ne "$content"
+
     rm $lock_file
 }
 
@@ -253,7 +265,7 @@ function ctrl_c() {
 #
 run() {
     info "Downloading music files : running ..."
-
+    start=`date +%s`
     # make newlines the only separator
     local IFS=$'\n'
 
@@ -267,8 +279,10 @@ run() {
     done < <(cat $DL_CONF_PATH)
 
     sleep 0.5 && wait_for_download
+    end=`date +%s`
 
-    info "\nDownloading music files : done."
+    info ""
+    info "Downloading music files : done ($((end-start))s)"
 }
 
 # comment or uncommnent a target entry
@@ -319,7 +333,7 @@ setup() {
 
     check_running
 
-    debug $RUNNING_INFO
+    debug "$RUNNING_INFO"
 
     prgs=('scdl' 'youtube-dl' 'ffmpeg')
     for prg in "${prgs[@]}"
@@ -334,7 +348,7 @@ setup() {
     check_if_file_exist "$YT_CONF_PATH" "youtube-dl configuration file"
     check_if_file_exist "$DL_CONF_PATH" "download configuration file"
 
-    if [ ! -f $YT_UPT ] || [ `find "$YT_UPT" -mmin +120` ]; then
+    if [ ! -f $YT_UPT ] || [ `find "$YT_UPT" -mmin +1140` ]; then
         info "updating youtube-dl ..."
         sudo youtube-dl --update
         rm -f $YT_UPT && touch $YT_UPT
@@ -372,7 +386,7 @@ pre() {
 # main
 #
 
-while getopts "l:a:m:d:c:y:o:r:ish" o; do
+while getopts "l:a:m:d:c:y:o:r:insh" o; do
     case "${o}" in
         d)
             DL_PATH=${OPTARG}
@@ -397,22 +411,27 @@ while getopts "l:a:m:d:c:y:o:r:ish" o; do
             ;;
         l)
             LEVEL=${OPTARG}
-	          ;;
+            ;;
         o)
             OUTPUT_MODE=${OPTARG}
             ;;
         i)
             INSTALL=1
             ;;
-	      h)
-	          usage "$USAGE"
+        n)
+            COLOR=1
+            ;;
+        h)
+            usage "$USAGE"
             exit 0
-	          ;;
-	      *)
-	          usage "$USAGE"
-	          exit 1
-	          ;;
+            ;;
+        *)
+            usage "$USAGE"
+            exit 1
+            ;;
     esac
 done
+
+# COLOR=0
 
 pre && setup && run

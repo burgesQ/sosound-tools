@@ -4,6 +4,14 @@
 
 This is the legendary SouSound ; release candidate 2
 
+* Rasp support
+
+- [ ] ensure deps work
+- [ ] create services
+- [ ] store logs (syslog ?)
+- [ ] opt remove colors
+- [ ] auto adb over tcp
+
 * v1.2
 
 ** Enhancement [0/4] [0%]
@@ -17,26 +25,24 @@ This is the legendary SouSound ; release candidate 2
       - [ ] support tcpip
       - [ ] support usb
       - [ ] cli choice if none provide
-*** TODO dl [/] [%]
 *** IDEA a simple api to access the scirpt ? [0/2] [0%]
     - [ ] api
     - [ ] front api
       - [ ] music streamer
-      - [ ] music player
+      - [ ] music browser
 
 
 ** a better doc [0/4] [0%]
 *** TODO dl [0/3] [0%]
-- [ ] args 
-- [ ] compat 
+- [ ] args
+- [ ] compat
 - [ ] error management
 *** TODO sync [0/3] [0%]
-- [ ] args 
-- [ ] compat 
+- [ ] args
+- [ ] compat
 - [ ] error management
 *** TODO wrapper
-*** IDEA quick start 
-
+*** IDEA quick start
 
 * v1.1
 
@@ -64,7 +70,6 @@ This is the legendary SouSound ; release candidate 2
 *** DONE sync [1/1] [100%]
     CLOSED: [2019-09-05 Thu 15:14]
     - [X] sync stop at the first file ..
-
 
 * v1
 

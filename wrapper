@@ -4,5 +4,9 @@ if [ $# -ne 1 ]; then
     echo "Please provide an IP to sync"
     exit 1
 else
-    ./dl -l 3 && ./sync -l 3 -c $1
+    if [[ "$1" == "-h" || "$1" == "--help" ]]; then
+        echo "$0 successively run the download then the syncing"
+    else
+        ./dl -l 3 && ./sync -l 3 -c $1
+    fi
 fi

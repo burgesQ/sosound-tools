@@ -1,6 +1,6 @@
 # dl
 
-`dl` is a simple utility that download tracks from YouTube or SoundCloud.
+`dl` is a script that download tracks from YouTube and SoundCloud.
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
@@ -54,28 +54,28 @@ Misc options :
 
 You can install the dependencies by running `dl -i`. The dependencies are :
 
-- [scdl](1), 
-- [youtube-dl](2), 
+- [scdl](1),
+- [youtube-dl](2),
 - [ffmpeg](3) (which is a deps from yt-dl),
+
+`dl` try to auto update `youtube-dl` every 24h.
 
 ## config files
 
-The one used by default are  is located under the `./etc/` directory.
+Some example are in the `./etc/` directory.
 
 ### dl.conf
 
-The `dl.conf` file is a simple text file that container, on each line (terminated by an `\n`), a name and a url.
+The `dl.conf` file is a text file that container, on each line (terminated by an `\n`), a name and a url.
 
-The name will be used to create a directory named after it and the music from the url will be downloaded in there.
+The name will be used to create a directory named after it and the music from the referenced url will be downloaded in there.
 
-The following example will download the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
+The following file is used to download the song `Shined On Me - Praise Cats Feat Andrea Love` into the `YouTube` directory:
 ```
 $ cat ./etc/dl.conf
 YouTube https://www.youtube.com/watch?v=wYhwcsjkbiw&list=LL8BoiGKpm1cpDd_nvkMzdxw&index=24&t=0s
 
 ```
-
-Don't forget to add a return at the last line, otherwise the line won't be handled !
 
 Every line begging with a `#` will be ignored.
 
@@ -83,13 +83,13 @@ Every line begging with a `#` will be ignored.
 
 The [youtube-dl documentation](2) is what you're looking for.
 
-In summary, allow to download track & playslist from youtube and other 
+In summary, allow to download track & playslist from youtube and other
 
 ### cookies.txt
 
 Again, the [youtube-dl documentation](6) get the things done.
 
-Used to connect yourself to your youtube account.
+Used to connect your account to the `youtube-dl` process.
 
 ## running `dl`
 
@@ -101,10 +101,10 @@ $ cd music_helper
 $ # install the deps
 $ dl -i
 $ # edit the ./etc/dl.conf according to your need
-$ dl -l 3 
+$ dl -l 3
 ```
 
-To update all youtube contente from a specific directory :
+To update all youtube content from a specific directory :
 ```bash
 $ dl -l 3 -d "/media/master/dd/Music/" -m 1
 ```
