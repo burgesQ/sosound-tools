@@ -1,0 +1,6 @@
+[Unit]
+Description=test job
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /tmp/1.sh
