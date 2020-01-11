@@ -6,11 +6,14 @@ This is the legendary SouSound ; release candidate 2
 
 * Rasp support
 
-- [ ] ensure deps work
+- [X] ensure deps work
 - [ ] create services
 - [ ] store logs (syslog ?)
-- [ ] opt remove colors
-- [ ] auto adb over tcp
+- [X] opt remove colors
+- [X] auto adb over tcp
+- [ ] usb stick **NOT** ~ntfs~ + automount
+- [ ] docker that stuff
+- [ ] submodule added by ssh
 
 * v1.2
 
