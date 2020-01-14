@@ -114,6 +114,9 @@ Misc options :
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 
+# trap SIGTERM as it's the signal send by docker
+trap ctrl_c SIGTERM
+
 # install scdl if needed
 install_scdl() {
     exit_if_not_installed "pip3"
@@ -292,7 +295,7 @@ wait_for_download() {
             break
         fi
         if [ $OUTPUT_MODE -eq 0 ]; then
-            echo -n "."
+            echo "."
         fi
         sleep 5
     done
@@ -407,6 +410,8 @@ setup() {
     info "Running a few checks ..."
 
     check_running
+
+    echo "PID : $$. Use kill -s USR1 $$ to properly stop the process"
 
     debug "$RUNNING_INFO"
 
