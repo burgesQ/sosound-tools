@@ -1,8 +1,9 @@
 FROM bash:4.4
 
 # install deps
-RUN apk add --no-cache py3-setuptools py3-pip curl git sudo && \
-  apk add --no-cache android-tools --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing && \
+RUN apk add --no-cache \
+  py3-setuptools py3-pip python curl git sudo ffmpeg android-tools \
+  --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing && \
   pip3 install --upgrade pip && \
   pip3 install scdl && \
   curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && \
@@ -11,7 +12,10 @@ RUN apk add --no-cache py3-setuptools py3-pip curl git sudo && \
   cp /root/adb-sync/adb-sync /usr/local/bin/
 
 # creating special directory
-RUN mkdir -p $HOME/.config/music_helper/{logs,lock}/{dl,sync}
+RUN mkdir -p $HOME/.config/music_helper/logs/dl && \
+  mkdir -p $HOME/.config/music_helper/logs/sync && \
+  mkdir -p $HOME/.config/music_helper/lock/dl && \
+  mkdir -p $HOME/.config/music_helper/lock/sync
 
 WORKDIR app
 COPY . /app
