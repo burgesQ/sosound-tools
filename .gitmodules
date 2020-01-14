@@ -1,3 +1,3 @@
-[submodule "sh_lib"]
-	path = sh_lib
+[submodule "libs"]
+	path = libs
 	url = git@github.com:burgesQ/sh_lib.git
