@@ -71,9 +71,17 @@ Run `make build` or `docker build -t sosound-tools .`.
 
 ### run
 
+To run the tools you'll need to share your own configuration files.
+
+The `docker-compose.yaml` is full of handful example.
+
 - share configuation files
 - share music dir
 - share network
+
+### stop
+
+To stop the container, use `docker stop sosound-tools`. `fetchSound` trap the SIGTERM signal (+ sigint); to ensure a clean exit.
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl
