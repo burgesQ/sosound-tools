@@ -1,5 +1,0 @@
-#! /bin/sh
-
-scdl -l https://soundcloud.com/letstayhigh -f -c --debug --download-archive .scdl_like.txt;
-scdl -l https://soundcloud.com/letstayhigh -p -c --debug --download-archive .scdl_playlist.txt
-# scdl -l https://soundcloud.com/letstayhigh -a -c --debug --download-archive .scdl_track_repost.txt
