@@ -1,0 +1,35 @@
+version: "3.4"
+
+services:
+
+  sosound-tools:
+    image: sosound-tools
+    container_name: sosound-tools
+    network_mode: host
+    volumes:
+      # local dir hosting music file
+      - /home/master/Music:/Music
+
+      # custom youtube-dl and cookies configuration
+      - ./etc/youtube-dl.conf:/root/.config/music_helper/youtube-dl.conf
+      - /home/master/.cookies.txt:/root/.cookies.txt
+
+      # fetchSound and syncSound configuration file
+      - ./etc/dl.conf:/root/.config/music_helper/dl.conf
+      - ./etc/sync.conf:/root/.config/music_helper/sync.conf
+
+      # share logs with the system
+      # - ./etc/logs:/root/.config/music_helper/logs
+
+      - dataLogs:/root/.config/music_helper/logs
+      - dataLocker:/root/.config/music_helper/lock
+
+    # use this command to fetch new sound
+    # command: fetchSound -l 3 -m 0 -d /Music
+
+    # use this command to sync new sound
+    command: syncSound -l 3 -c 192.168.188.68 -d /Music
+
+volumes:
+  dataLocker:
+  dataLogs:
