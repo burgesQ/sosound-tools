@@ -411,8 +411,6 @@ setup() {
 
     check_running
 
-    echo "PID : $$. Use kill -s USR1 $$ to properly stop the process"
-
     debug "$RUNNING_INFO"
 
     prgs=('scdl' 'youtube-dl' 'ffmpeg')

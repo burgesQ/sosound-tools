@@ -14,6 +14,9 @@ This is the legendary SouSound ; release candidate 2
 - [ ] usb stick **NOT** ~ntfs~ + automount
 - [X] docker that stuff
 - [X] submodule added by ssh
+- [ ] sync ok
+- [ ] fetch ok
+- [ ] let's update our files
 
 * v1.2
 
