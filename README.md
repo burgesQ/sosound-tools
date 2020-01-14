@@ -61,6 +61,20 @@ $ git submdule update --init --recusrive
 
 `./docs/wrapper.md`
 
+## Docker
+
+Alternately, you can build a docker image so all the deps are located inside the container.
+
+### build
+
+Run `make build` or `docker build -t sosound-tools .`.
+
+### run
+
+- share configuation files
+- share music dir
+- share network
+
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl
 [3]: https://ffmpeg.org/

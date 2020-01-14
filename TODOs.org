@@ -1,4 +1,4 @@
-#+TITLE: music_helper todo's
+#+TITLE: sosound todo's
 #+DESCRIPTION: This is an exaustiv list of todo's for the music_helper solution
 #+AUTHOR: Quentin Burgess quentin.burgess@frafos.com
 
@@ -12,8 +12,8 @@ This is the legendary SouSound ; release candidate 2
 - [X] opt remove colors
 - [X] auto adb over tcp
 - [ ] usb stick **NOT** ~ntfs~ + automount
-- [ ] docker that stuff
-- [ ] submodule added by ssh
+- [X] docker that stuff
+- [X] submodule added by ssh
 
 * v1.2
 
@@ -28,7 +28,7 @@ This is the legendary SouSound ; release candidate 2
       - [ ] support tcpip
       - [ ] support usb
       - [ ] cli choice if none provide
-*** IDEA a simple api to access the scirpt ? [0/2] [0%]
+*** IDEA a simple api to interacte with the scirpt ? [0/2] [0%]
     - [ ] api
     - [ ] front api
       - [ ] music streamer
