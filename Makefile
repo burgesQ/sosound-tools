@@ -1,4 +1,4 @@
-NAME		= sosound
+NAME		= sosound-tools
 
 RM			= rm -f
 
@@ -10,7 +10,7 @@ $(NAME):	build
 .PHONY:	build
 ## build: Build the docker image
 build:
-	@ docker build -t $(NAME) .
+	@docker build --rm -t $(NAME) .
 
 .PHONY:	help
 ## help: Prints this help message
