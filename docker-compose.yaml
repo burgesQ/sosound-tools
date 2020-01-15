@@ -8,7 +8,7 @@ services:
     network_mode: host
     volumes:
       # local dir hosting music file
-      - /home/master/Music:/Music
+      - /home/master/Music:/root/Music
 
       # custom youtube-dl and cookies configuration
       - ./etc/youtube-dl.conf:/root/.config/music_helper/youtube-dl.conf
@@ -21,14 +21,14 @@ services:
       # share logs with the system
       # - ./etc/logs:/root/.config/music_helper/logs
 
+      # dev mode
+      - .:/app
+
+      # persist logs and locks
       - dataLogs:/root/.config/music_helper/logs
       - dataLocker:/root/.config/music_helper/lock
-
-    # use this command to fetch new sound
-    # command: sleep 10000
-    command: fetchSound -l 3 -m 0 -d /Music/
-    # use this command to sync new sound
-    # command: syncSound -l 3 -c 192.168.188.68 -d /Music/
+    env_file:
+      - .env
 
 volumes:
   dataLocker:

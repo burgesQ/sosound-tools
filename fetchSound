@@ -244,6 +244,18 @@ handle_youtube() {
 # Global function
 #
 
+
+check_new_file() {
+    local watch_path="$1"
+    local lock_file="$2"
+
+    debug "Watching for new file in $watch_path"
+    inotifywait -m "$watch_path" -e create -e moved_to -e delete --format "%T: %f has been %e (%w)" --timefmt "%H:%M:%S" |
+        while read l ; do
+            info " + $l"
+        done
+}
+
 # Process the argument; create the dl dir;
 downloader() {
     local path=$1
@@ -260,6 +272,10 @@ downloader() {
     pre_cout=`ls -l $dl_path | wc -l`
 
     cd "$dl_path"
+    check_new_file "$dl_path" "$lock_file" &
+    local last_pid=$!
+    WORKERS+=("$last_pid")
+
     if [ `is_soundcloud "$url"` == "1" ] ; then
         handle_soundcloud $path "$url"
     elif [ `is_youtube "$url"` == "1" ]; then
