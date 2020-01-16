@@ -12,10 +12,10 @@ RUN apk add --no-cache \
   cp /root/adb-sync/adb-sync /usr/local/bin/
 
 # creating special directory
-RUN mkdir -p $HOME/.config/music_helper/logs/dl && \
-  mkdir -p $HOME/.config/music_helper/logs/sync && \
-  mkdir -p $HOME/.config/music_helper/lock/dl && \
-  mkdir -p $HOME/.config/music_helper/lock/sync
+RUN mkdir -p $HOME/.config/sosound/logs/dl && \
+  mkdir -p $HOME/.config/sosound/logs/sync && \
+  mkdir -p $HOME/.config/sosound/lock/dl && \
+  mkdir -p $HOME/.config/sosound/lock/sync
 
 COPY . /app
 

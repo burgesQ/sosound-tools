@@ -19,7 +19,7 @@ if [ $? -ne 0 ]; then
     source $SCRIPTPATH/sh_lib/sh_lib
 fi
 
-CFG_PATH=$HOME/.config/music_helper
+CFG_PATH=$HOME/.config/sosound
 
 # static value
 LOG_PATH=$CFG_PATH/logs/sync/

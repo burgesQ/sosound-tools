@@ -11,22 +11,22 @@ services:
       - /home/master/Music:/root/Music
 
       # custom youtube-dl and cookies configuration
-      - ./etc/youtube-dl.conf:/root/.config/music_helper/youtube-dl.conf
-      - /home/master/.cookies.txt:/root/.cookies.txt
+      - ./etc/youtube-dl.conf:/root/.config/sosound/youtube-dl.conf
+      - ./etc/.cookies.txt:/root/.cookies.txt
 
       # fetchSound and syncSound configuration file
-      - ./etc/dl.conf:/root/.config/music_helper/dl.conf
-      - ./etc/sync.conf:/root/.config/music_helper/sync.conf
+      - ./etc/dl.conf:/root/.config/sosound/dl.conf
+      - ./etc/sync.conf:/root/.config/sosound/sync.conf
 
       # share logs with the system
-      # - ./etc/logs:/root/.config/music_helper/logs
+      # - ./etc/logs:/root/.config/sosound/logs
 
       # dev mode
       - .:/app
 
       # persist logs and locks
-      - dataLogs:/root/.config/music_helper/logs
-      - dataLocker:/root/.config/music_helper/lock
+      - dataLogs:/root/.config/sosound/logs
+      - dataLocker:/root/.config/sosound/lock
     env_file:
       - .env
 

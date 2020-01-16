@@ -25,7 +25,7 @@ if [ $? -ne 0 ]; then
     source $SCRIPTPATH/sh_lib/sh_lib
 fi
 
-CFG_PATH=$HOME/.config/music_helper
+CFG_PATH=$HOME/.config/sosound
 
 # static value
 LOG_PATH=$CFG_PATH/logs/dl/
@@ -248,11 +248,12 @@ handle_youtube() {
 check_new_file() {
     local watch_path="$1"
     local lock_file="$2"
+    local log_file="$LOG_PATH$(basename $watch_path)"
 
     debug "Watching for new file in $watch_path"
-    inotifywait -m "$watch_path" -e create -e moved_to -e delete --format "%T: %f has been %e (%w)" --timefmt "%H:%M:%S" |
+    inotifywait -m "$watch_path" -e create -e moved_to -e delete --format "%T: %f has been %e (%w)" --timefmt "%H:%M:%S" --excludei "\.(temp|part|webm|m4a|jpg)(\.mp3)?" |
         while read l ; do
-            info " + $l"
+            debug " + $l"
         done
 }
 
@@ -290,11 +291,11 @@ downloader() {
 
     post_cout=`ls -l $dl_path | wc -l`
 
-    content="[$path : done | pre : $pre_cout -- post : $post_cout]"
-    if [ $COLOR -eq 0 ]; then
-        content="\e[93m$content\e[0m"
-    fi
-    echo -ne "$content"
+    info "[$path : done | pre : $pre_cout -- post : $post_cout]"
+    # if [ $COLOR -eq 0 ]; then
+    #     content="\e[93m$content\e[0m"
+    # fi
+    # echo -ne "$content"
 
     rm $lock_file
 }
@@ -310,9 +311,9 @@ wait_for_download() {
         if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
             break
         fi
-        if [ $OUTPUT_MODE -eq 0 ]; then
-            echo "."
-        fi
+        # if [ $OUTPUT_MODE -eq 0 ]; then
+        #     echo "."
+        # fi
         sleep 5
     done
 }
