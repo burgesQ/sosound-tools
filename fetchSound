@@ -311,9 +311,6 @@ wait_for_download() {
         if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
             break
         fi
-        # if [ $OUTPUT_MODE -eq 0 ]; then
-        #     echo "."
-        # fi
         sleep 5
     done
 }
@@ -350,6 +347,7 @@ function ctrl_c() {
     sleep 1
     info "\n[-] removing lock files"
     rm -rf $LOCK_DIR/*
+
     exit 0
 }
 
@@ -376,7 +374,6 @@ run() {
     sleep 0.5 && wait_for_download
     end=`date +%s`
 
-    info ""
     info "Downloading music files : done ($((end-start))s)"
 }
 
