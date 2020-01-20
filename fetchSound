@@ -111,6 +111,12 @@ Misc options :
 # Misc
 #
 
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+
+# trap SIGTERM as it's the signal send by docker
+trap ctrl_c SIGTERM
+
 # handle ^+c
 function ctrl_c() {
     info "\n\n** Trapped CTRL-C"
@@ -128,12 +134,6 @@ function ctrl_c() {
 
     exit 0
 }
-
-# trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
-
-# trap SIGTERM as it's the signal send by docker
-trap ctrl_c SIGTERM
 
 # install youtube-dl
 install_yt() {

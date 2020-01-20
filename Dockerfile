@@ -2,7 +2,7 @@ FROM bash:4.4
 
 # install deps
 RUN apk add --no-cache \
-  android-tools curl ffmpeg git inotify-tools python sudo \
+  android-tools curl ffmpeg git inotify-tools python python3 sudo \
   --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing && \
   curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && \
   chmod a+rx /usr/local/bin/youtube-dl && \

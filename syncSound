@@ -34,11 +34,13 @@ CONNECT_IP=0.0.0.0
 
 INSTALL=0
 
+WORKERS=()
+
 # TODO: usage use \n \t and stuffs
 USAGE="
-Usage : sync -d [path] -s [path] -c [IP] -l [0..3] -i -h
+Usage : $0 -d [path] -s [path] -c [IP] -l [0..3] -i -h
 
-Run sync, a simple android sync script.
+Run $0, a simple android sync script.
 
 Configuration options :
 
@@ -58,7 +60,29 @@ Misc options :
     -h:     display this screen
 "
 
-# TODO: install adb-sync
+#
+# Misc
+#
+
+# trap ctrl-c and call ctrl_c()
+trap ctrl_c INT
+trap ctrl_c SIGTERM
+
+# handle ^+c
+function ctrl_c() {
+    info "\n\n** Trapped CTRL-C"
+    info "killing child..."
+    pkill adb-sync
+    sleep 0.1
+    for entry in "${WORKERS[@]}"; do # kill remaining workers
+        kill $entry &> /dev/null
+    done
+    sleep 1
+    info "\n[-] removing remaning lock files"
+    ls $LOCK_DIR/
+    rm -rf $LOCK_DIR/*
+    exit 0
+}
 
 #
 # Sync a directory sourced from the config file
@@ -72,17 +96,13 @@ sync_dir() {
     local log_file="$LOG_PATH$racine.log"
     local lock_file="$LOCK_DIR$racine.lock"
 
-
     touch $lock_file && touch $log_file
     # sleep cause adb-sync is in some way block the process
-    sleep 2
-    adb-sync -n "$path" "$TARGET_PATH" &> $log_file
-    content="[Sync of $dir : done]"
-    if [ $COLOR -eq 0 ]; then
-        content="\e[93m$content\e[0m"
-    fi
+    sleep 0.5
+    adb-sync -n "$path" "$TARGET_PATH" 2> "$log_file"
 
-    echo -ne "$content" && rm $lock_file
+    info "[Sync of $dir : done]"
+    rm $lock_file
 }
 
 #
@@ -97,13 +117,9 @@ wait_for_sync() {
         if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
             break
         fi
-        # TODO: some recap of removed files ?
-        echo "."
         sleep 5
     done
 }
-
-WORKERS=()
 
 #
 # Read the configuration file to extract
@@ -129,26 +145,7 @@ run() {
 
     sleep 0.5 && wait_for_sync
 
-    info "\nSyncing file with the android device : done."
-}
-
-# trap ctrl-c and call ctrl_c()
-trap ctrl_c INT
-
-# handle ^+c
-function ctrl_c() {
-    info "\n\n** Trapped CTRL-C"
-    info "killing child..."
-    pkill adb-sync
-    sleep 0.1
-    for entry in "${WORKERS[@]}"; do # kill remaining workers
-        kill $entry &> /dev/null
-    done
-    sleep 1
-    info "\n[-] removing remaning lock files"
-    ls $LOCK_DIR/
-    rm -rf $LOCK_DIR/*
-    exit 0
+    info "Syncing file with the android device : done."
 }
 
 #
