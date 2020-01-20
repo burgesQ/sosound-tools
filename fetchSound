@@ -75,9 +75,9 @@ RUNNING_INFO="
 "
 
 USAGE="
-Usage : dl -d [path] -c [path] -y [path] -m [0..3] -s -n -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
+Usage : $0 -d [path] -c [path] -y [path] -m [0..3] -s -n -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
 
-Run dl, a simple music downloader script.
+Run $0, a simple music downloader script.
 
 Download configuration options :
 
@@ -111,18 +111,29 @@ Misc options :
 # Misc
 #
 
+# handle ^+c
+function ctrl_c() {
+    info "\n\n** Trapped CTRL-C"
+    info "killing child..."
+    pkill youtube-dl
+    pkill scdl # killing scdl twice as the process successively launch it 2 times
+    sleep 0.1
+    pkill scdl
+    for entry in "${WORKERS[@]}"; do # kill remaining workers
+        kill $entry &> /dev/null
+    done
+    sleep 1
+    info "[-] removing lock files"
+    rm -rf $LOCK_DIR/*
+
+    exit 0
+}
+
 # trap ctrl-c and call ctrl_c()
 trap ctrl_c INT
 
 # trap SIGTERM as it's the signal send by docker
 trap ctrl_c SIGTERM
-
-# install scdl if needed
-install_scdl() {
-    exit_if_not_installed "pip3"
-    pip3 install scdl
-    info "scdl (a soundcloud downloader) installed"
-}
 
 # install youtube-dl
 install_yt() {
@@ -133,7 +144,7 @@ install_yt() {
 }
 
 #
-# Soundcloud functions
+# Guess functions
 #
 
 # define if the url has to be dl via scdl
@@ -147,32 +158,6 @@ is_soundcloud() {
     fi
 }
 
-# download playlists from soundcloud
-download_from_sc_playlist() {
-    local url=$1
-    scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
-    echo $?
-}
-
-# download likes from soundcloud
-download_from_sc_like() {
-    local url=$1
-    scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
-    echo $?
-}
-
-#
-# YouTube function
-#
-
-# download (playlist/track) from youtube
-download_from_yt() {
-    local url=$1
-    # add version at the beginning of the log file ?
-    youtube-dl --verbose --config-location $YT_CONF_PATH $url
-    echo $?
-}
-
 # define if the url has to be dl via youtube-dl
 is_youtube() {
     local url=$1
@@ -184,41 +169,20 @@ is_youtube() {
     fi
 }
 
-# list entry in conf file
-pretty_print_entry() {
-    local path=`echo "$1" | cut -d ' ' -f1`
-    local url=`echo "$1" | cut -d ' ' -f2`
-    local ignored="false"
+#
+# DL function
+#
 
-    if [ "$path" == "#" ]; then
-        ignored="true"
-        path=$url
-        url=`echo "$1" | cut -d ' ' -f3`
-    fi
-
-    info "Target: $path -- Source: $url (ingored: $ignored)"
+# download (playlist/track) from youtube
+download_from_yt() {
+    local url=$1
+    # add version at the beginning of the log file ?
+    youtube-dl --verbose --config-location $YT_CONF_PATH $url
+    echo $?
 }
 
 #
-# Soundcloud functions
-#
-
-# handle the log logic / running of scdl
-handle_soundcloud() {
-    path=$1
-    url=$2
-    local log_file="$LOG_PATH$(basename $path)"
-
-    if [ $OUTPUT_MODE -eq 0 ]; then
-        (echo -e "scld : $path\n" ; download_from_sc_like "$url") &> "$log_file"_like.log
-        (echo -e "scdl : $path\n" ; download_from_sc_playlist "$url") &> "$log_file"_playlist.log
-    else
-        download_from_sc_like "$url" ; download_from_sc_playlist "$url"
-    fi
-}
-
-#
-# YouTube function
+# Handler function
 #
 
 # handle the log logic / running of youtube-dl
@@ -243,7 +207,6 @@ handle_youtube() {
 #
 # Global function
 #
-
 
 check_new_file() {
     local watch_path="$1"
@@ -278,7 +241,8 @@ downloader() {
     WORKERS+=("$last_pid")
 
     if [ `is_soundcloud "$url"` == "1" ] ; then
-        handle_soundcloud $path "$url"
+#        handle_soundcloud $path "$url"
+        handle_youtube $path "$url"
     elif [ `is_youtube "$url"` == "1" ]; then
         handle_youtube $path "$url"
     elif [ $DL_MODE -eq 3 ]; then
@@ -292,10 +256,6 @@ downloader() {
     post_cout=`ls -l $dl_path | wc -l`
 
     info "[$path : done | pre : $pre_cout -- post : $post_cout]"
-    # if [ $COLOR -eq 0 ]; then
-    #     content="\e[93m$content\e[0m"
-    # fi
-    # echo -ne "$content"
 
     rm $lock_file
 }
@@ -333,24 +293,6 @@ handle_dl() {
     fi
 }
 
-# handle ^+c
-function ctrl_c() {
-    info "\n\n** Trapped CTRL-C"
-    info "killing child..."
-    pkill youtube-dl
-    pkill scdl # killing scdl twice as the process successively launch it 2 times
-    sleep 0.1
-    pkill scdl
-    for entry in "${WORKERS[@]}"; do # kill remaining workers
-        kill $entry &> /dev/null
-    done
-    sleep 1
-    info "\n[-] removing lock files"
-    rm -rf $LOCK_DIR/*
-
-    exit 0
-}
-
 #
 # Read the download configuration file ;
 # run the download if needed and then wait
@@ -375,6 +317,25 @@ run() {
     end=`date +%s`
 
     info "Downloading music files : done ($((end-start))s)"
+}
+
+#
+# Conf file functions
+#
+
+# list entry in conf file
+pretty_print_entry() {
+    local path=`echo "$1" | cut -d ' ' -f1`
+    local url=`echo "$1" | cut -d ' ' -f2`
+    local ignored="false"
+
+    if [ "$path" == "#" ]; then
+        ignored="true"
+        path=$url
+        url=`echo "$1" | cut -d ' ' -f3`
+    fi
+
+    info "Target: $path -- Source: $url (ingored: $ignored)"
 }
 
 # comment or uncommnent a target entry
@@ -405,6 +366,10 @@ show_them_all() {
     done < <(cat $DL_CONF_PATH)
 }
 
+#
+# Setup functions
+#
+
 # check if no other dl/sync process are running
 check_running() {
     if [ "`find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .`" == "1"  ]; then
@@ -427,7 +392,7 @@ setup() {
 
     debug "$RUNNING_INFO"
 
-    prgs=('scdl' 'youtube-dl' 'ffmpeg')
+    prgs=('youtube-dl' 'ffmpeg')
     for prg in "${prgs[@]}"
     do
         exit_if_not_installed $prg
@@ -523,7 +488,5 @@ while getopts "l:a:m:d:c:y:o:r:insh" o; do
             ;;
     esac
 done
-
-# COLOR=0
 
 pre && setup && run

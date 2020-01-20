@@ -2,10 +2,8 @@ FROM bash:4.4
 
 # install deps
 RUN apk add --no-cache \
-  py3-setuptools py3-pip python curl git sudo ffmpeg android-tools inotify-tools \
+  android-tools curl ffmpeg git inotify-tools python sudo \
   --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing && \
-  pip3 install --upgrade pip && \
-  pip3 install scdl && \
   curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && \
   chmod a+rx /usr/local/bin/youtube-dl && \
   git clone https://github.com/google/adb-sync /root/adb-sync && \
