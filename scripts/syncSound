@@ -155,14 +155,30 @@ run() {
 connect() {
     info "connecting to the android device"
 
+    retry=$1
+    connected="$CONNECT_IP:5555 device"
+
     adb connect "$CONNECT_IP"
+    adb devices
     ok=`adb devices | grep "$CONNECT_IP"`
-    if [ -z "$ok" ]; then
-        error "can't run adb connect [$CONNECT_IP], are you sure that you are in tcpip mode ?"
-        exit 6
+
+    if [ "$ok" = "$connected" ]; then
+        debug "adb-sync connected"
+    else
+    # if [[ "$ok" != "$connected" ]]; then
+        echo "[$ok]"
+        echo "[$connected]"
+        if [ $retry -eq 0 ] ; then
+            debug "retrying to connect ..."
+            connect 1
+        else
+            debug "ok look like ($retry) [$ok]"
+            error "can't run adb connect [$CONNECT_IP], are you sure that you are in tcpip mode ?"
+            exit 6
+        fi
     fi
 
-    debug "adb-sync connected"
+
 }
 
 install_adb-sync() {
@@ -252,4 +268,4 @@ if [ $INSTALL -eq 1 ]; then
     exit 0
 fi
 
-setup && connect && run
+setup && connect 0 && run

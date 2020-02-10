@@ -15,8 +15,6 @@
 
 <!-- markdown-toc end -->
 
-TODO: [enable adb over tcpip][7]
-
 ## what
 
 Some bash script that download music and sync them to a remote android device.
@@ -27,49 +25,25 @@ Some bash script that download music and sync them to a remote android device.
 | [`sync`](#sync)       | sync file            |
 | [`wrapper`](#wrapper) | run `dl` then `sync` |
 
-## requirement
+## installing
 
-You'll need to have those package installed on your system :
+You'll need to have `make`, `docker` and `docker-compose` installed on your system.
 
-### global
+Not that this project have submodule, please update them running : 
 
-[`sh_lib`][6] (which is a submodule of this project) :
 ```bash
 $ git submdule update --init --recusrive
 ```
-
-### for ``dl`
-
-- [scdl][1]
-- [youtube-dl][2],
-- [ffmpeg][3]
-
-### for `sync`
-
-- [adb][4]
-- [adb-sync][5]
-
-## `dl`
-
-`./docs/dl.md`
-
-## `sync`
-
-`./docs/sync.md`
-
-## `wrapper`
-
-`./docs/wrapper.md`
-
-## Docker
-
-Alternately, you can build a docker image so all the deps are located inside the container.
 
 ### build
 
 Run `make build` or `docker build -t sosound-tools .`.
 
-### run
+### start
+
+Run `make run` or `docker-compose up` to run the scripts.
+
+Edit the `.env` file according to your needs.
 
 To run the tools you'll need to share your own configuration files.
 
@@ -81,7 +55,7 @@ The `docker-compose.yaml` is full of handful example.
 
 ### stop
 
-To stop the container, use `docker stop sosound-tools`. `fetchSound` trap the SIGTERM signal (+ sigint); to ensure a clean exit.
+To stop the container, run `docker-compose down`. `fetchSound` trap the SIGTERM signal (+ sigint); to ensure a clean exit.
 
 [1]: https://github.com/flyingrub/scdl
 [2]: https://github.com/ytdl-org/youtube-dl

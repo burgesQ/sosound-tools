@@ -3,7 +3,9 @@ version: "3.4"
 services:
 
   sosound-tools:
-    image: sosound-tools
+    build:
+      context: .
+      # image: sosound-tools
     container_name: sosound-tools
     network_mode: host
     volumes:

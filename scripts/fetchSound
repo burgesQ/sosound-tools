@@ -181,6 +181,20 @@ download_from_yt() {
     echo $?
 }
 
+# download playlists from soundcloud
+download_from_sc_playlist() {
+        local url=$1
+        scdl -l "$url" -p -c --hide-progress --download-archive .scdl_playlist.txt
+        echo $?
+    }
+
+# download likes from soundcloud
+download_from_sc_like() {
+        local url=$1
+        scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
+           echo $?
+}
+
 #
 # Handler function
 #
@@ -201,6 +215,20 @@ handle_youtube() {
 
     if [ "$ret" != "0" ]; then
         error "Error while downloading $path - please check the logs"
+    fi
+}
+
+# handle the log logic / running of scdl
+handle_soundcloud() {
+    path=$1
+    url=$2
+    local log_file="$LOG_PATH$(basename $path)"
+
+    if [ $OUTPUT_MODE -eq 0 ]; then
+        (echo -e "scld : $path\n" ; download_from_sc_like "$url") &> "$log_file"_like.log
+        (echo -e "scdl : $path\n" ; download_from_sc_playlist "$url") &> "$log_file"_playlist.log
+    else
+        download_from_sc_like "$url" ; download_from_sc_playlist "$url"
     fi
 }
 
@@ -241,8 +269,8 @@ downloader() {
     WORKERS+=("$last_pid")
 
     if [ `is_soundcloud "$url"` == "1" ] ; then
-#        handle_soundcloud $path "$url"
-        handle_youtube $path "$url"
+        handle_soundcloud $path "$url"
+#         handle_youtube $path "$url"
     elif [ `is_youtube "$url"` == "1" ]; then
         handle_youtube $path "$url"
     elif [ $DL_MODE -eq 3 ]; then
