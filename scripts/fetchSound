@@ -56,6 +56,7 @@ OUTPUT_MODE=0
 SHOW=0
 NEW_TARGET=
 ENTRY=
+URL=""
 
 RUNNING_INFO="
     download path :          $DL_PATH
@@ -311,6 +312,11 @@ handle_dl() {
 
     debug "Processing $path"
 
+    if [ "$URL" != "" ]; then
+       path="dl"
+       url=$URL
+    fi
+
     if [ -z "$url" ] || [ -z "$path" ]; then
         error "Invalid value in the download configuration file for ($path):[$url]"
         warn "Skipping"
@@ -331,6 +337,10 @@ run() {
     start=`date +%s`
     # make newlines the only separator
     local IFS=$'\n'
+
+    if [ "$URL" != "" ]; then
+        handle_dl "$f"
+    fi
 
     while read f ; do
         if [ $SHOW -eq 1 ]; then
@@ -471,7 +481,7 @@ pre() {
 # main
 #
 
-while getopts "l:a:m:d:c:y:o:r:insh" o; do
+while getopts "l:a:m:d:c:y:o:r:u:insh" o; do
     case "${o}" in
         d)
             DL_PATH=${OPTARG}
@@ -505,6 +515,9 @@ while getopts "l:a:m:d:c:y:o:r:insh" o; do
             ;;
         n)
             COLOR=1
+            ;;
+        u)
+            URL=${OPTARG}
             ;;
         h)
             usage "$USAGE"
