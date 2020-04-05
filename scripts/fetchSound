@@ -192,7 +192,7 @@ download_from_sc_playlist() {
 download_from_sc_like() {
         local url=$1
         scdl -l "$url" -f -c --hide-progress --download-archive .scdl_like.txt
-           echo $?
+        echo $?
 }
 
 #
@@ -269,7 +269,7 @@ downloader() {
     WORKERS+=("$last_pid")
 
     if [ `is_soundcloud "$url"` == "1" ] ; then
-        handle_soundcloud $path "$url"
+        handle_youtube $path "$url"
 #         handle_youtube $path "$url"
     elif [ `is_youtube "$url"` == "1" ]; then
         handle_youtube $path "$url"
