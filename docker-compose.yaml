@@ -26,6 +26,10 @@ services:
       # persist logs and locks
       - dataLogs:/root/.config/sosound/logs
       - dataLocker:/root/.config/sosound/lock
+
+      # symlink logs file
+      - ./logs:/logs
+
     env_file:
       - .env
 

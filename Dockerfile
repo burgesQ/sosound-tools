@@ -23,7 +23,8 @@ RUN echo "creating required directories" && \
   mkdir -p $HOME/.config/sosound/logs/dl && \
   mkdir -p $HOME/.config/sosound/logs/sync && \
   mkdir -p $HOME/.config/sosound/lock/dl && \
-  mkdir -p $HOME/.config/sosound/lock/sync
+  mkdir -p $HOME/.config/sosound/lock/sync && \
+  mkdir -p /logs
 
 COPY . /app
 
@@ -38,4 +39,6 @@ ENV running_opt='-l 3 -m 3'
 WORKDIR root
 
 CMD echo "Running ${running_cmd} (binary) ${running_opt} (options)" ; \
- ${running_cmd} ${running_opt}
+  ${running_cmd} ${running_opt} ; \
+  echo "Copying logs file to /logs" ; \
+  cp -rf $HOME/.config/sosound/logs /logs

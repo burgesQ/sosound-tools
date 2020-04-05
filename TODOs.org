@@ -11,12 +11,14 @@ This is the legendary SouSound ; release candidate 2
 - [ ] store logs (syslog ?)
 - [X] opt remove colors
 - [X] auto adb over tcp
-- [ ] usb stick **NOT** ~ntfs~ + automount
+- [X] usb stick **NOT** ~ntfs~ + automount
+- [ ] fund why that adb sync won't run concurently
 - [X] docker that stuff
 - [X] submodule added by ssh
 - [ ] sync ok
 - [ ] fetch ok
 - [ ] let's update our files
+
 
 * v1.2
 
