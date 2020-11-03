@@ -8,27 +8,29 @@ services:
       # image: sosound-tools
     container_name: sosound-tools
     network_mode: host
+    # fix permission, but need to create the unser in docker then
+    # user: 1000:1000
     volumes:
       # local dir hosting music file
       - /home/master/Music:/root/Music
 
       # custom youtube-dl and cookies configuration
       - ./etc/youtube-dl.conf:/root/.config/sosound/youtube-dl.conf
-      - ./etc/.cookies.txt:/root/.cookies.txt
+      - ~/.cookies.txt:/root/.cookies.txt
 
       # fetchSound and syncSound configuration file
       - ./etc/dl.conf:/root/.config/sosound/dl.conf
       - ./etc/sync.conf:/root/.config/sosound/sync.conf
 
       # dev mode
-      - .:/app
+      # - .:/app
 
       # persist logs and locks
-      - dataLogs:/root/.config/sosound/logs
-      - dataLocker:/root/.config/sosound/lock
+      - ./etc/logs/:/root/.config/sosound/logs
+      - ./etc/lock/:/root/.config/sosound/lock
 
       # symlink logs file
-      - ./logs:/logs
+      # - ./logs:/logs
 
     env_file:
       - .env

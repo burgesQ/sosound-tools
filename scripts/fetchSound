@@ -25,7 +25,7 @@ if [ $? -ne 0 ]; then
     source $SCRIPTPATH/sh_lib/sh_lib
 fi
 
-CFG_PATH=$HOME/.config/sosound
+CFG_PATH=~/.config/sosound
 
 # static value
 LOG_PATH=$CFG_PATH/logs/dl/
@@ -207,6 +207,7 @@ handle_youtube() {
     local ret
     local log_file="$LOG_PATH$(basename $path)"
 
+    echo "output $OUTPUT_MODE"
     if [ $OUTPUT_MODE -eq 0 ]; then
         (echo -e "youtube-dl : $path\n" ; download_from_yt "$url") &> "$log_file".log
         ret=`cat $log_file.log | tail -n 1`
@@ -225,6 +226,7 @@ handle_soundcloud() {
     url=$2
     local log_file="$LOG_PATH$(basename $path)"
 
+    echo "output $OUTPUT_MODE"
     if [ $OUTPUT_MODE -eq 0 ]; then
         (echo -e "scld : $path\n" ; download_from_sc_like "$url") &> "$log_file"_like.log
         (echo -e "scdl : $path\n" ; download_from_sc_playlist "$url") &> "$log_file"_playlist.log
@@ -271,7 +273,7 @@ downloader() {
 
     if [ `is_soundcloud "$url"` == "1" ] ; then
         handle_youtube $path "$url"
-#         handle_youtube $path "$url"
+#         handle_soundcloud $path "$url"
     elif [ `is_youtube "$url"` == "1" ]; then
         handle_youtube $path "$url"
     elif [ $DL_MODE -eq 3 ]; then
@@ -297,7 +299,7 @@ wait_for_download() {
     info "Waiting for downlaod to finish"
     while true
     do
-        if ! (find $LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
+        if ! (find $LOCK_DIR -mindepth 1 -print -quit 2>/dev/null | grep -q .); then
             break
         fi
         sleep 5
@@ -313,7 +315,7 @@ handle_dl() {
     debug "Processing $path"
 
     if [ "$URL" != "" ]; then
-       path="dl"
+       path="run"
        url=$URL
     fi
 
@@ -410,10 +412,10 @@ show_them_all() {
 
 # check if no other dl/sync process are running
 check_running() {
-    if [ "`find $SYNC_LOCK_DIR/ -mindepth 1 -print -quit 2>/dev/null | grep -q .`" == "1"  ]; then
+    if [ "`find $SYNC_LOCK_DIR -mindepth 1 -print -quit 2>/dev/null | grep -q .`" == "1"  ]; then
         error "Cannot dl while syncing"
         exit 4
-    elif [ "`ls -l $LOCK_DIR/ | wc -l`" != "1" ]; then
+    elif [ "`ls -l $LOCK_DIR | wc -l`" != "1" ]; then
         error "A dl process is already running"
         exit 5
     fi
@@ -426,9 +428,9 @@ check_running() {
 setup() {
     info "Running a few checks ..."
 
-    check_running
-
     debug "$RUNNING_INFO"
+
+    check_running
 
     prgs=('youtube-dl' 'ffmpeg')
     for prg in "${prgs[@]}"
@@ -509,6 +511,8 @@ while getopts "l:a:m:d:c:y:o:r:u:insh" o; do
             ;;
         o)
             OUTPUT_MODE=${OPTARG}
+            echo "settintg output mod to $OUTPUT_MODE"
+            echo
             ;;
         i)
             INSTALL=1
