@@ -7,14 +7,21 @@ ENV PYTHONUNBUFFERED=1
 # installing deps
 RUN echo "installing required package" && \
   apk add --no-cache \
-  android-tools curl ffmpeg git inotify-tools python python3 sudo \
+  android-tools curl ffmpeg git inotify-tools python3 sudo \
   --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing \
   && python3 -m ensurepip \
-  && rm -r /usr/lib/python*/ensurepip \
-  && pip3 install --no-cache --upgrade pip setuptools wheel \
-  && pip3 install scdl \
+  && rm -r /usr/lib/python*/ensurepip
+
+RUN echo "installing scdl" && \
+  pip3 install --no-cache --upgrade pip setuptools wheel && \
+  pip3 install scdl
+
+RUN echo "installing youtbe-dl"  \
   && curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl \
-  && chmod a+rx /usr/local/bin/youtube-dl \
+  && chmod a+rx /usr/local/bin/youtube-dl
+
+
+RUN echo "installing adb-sync"  \
   && git clone https://github.com/google/adb-sync /root/adb-sync \
   && cp /root/adb-sync/adb-sync /usr/local/bin/ && rm -rf /root/adb-sync
 
@@ -37,6 +44,8 @@ ENV running_cmd=fetchSound
 ENV running_opt='-l 3 -m 3'
 
 WORKDIR root
+
+RUN ln -fs /usr/bin/python3 /usr/bin/python
 
 CMD echo "Running ${running_cmd} (binary) ${running_opt} (options)" ; \
   ${running_cmd} ${running_opt}
