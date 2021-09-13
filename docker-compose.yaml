@@ -23,9 +23,10 @@ services:
       - ./etc/sync.conf:/root/.config/sosound/sync.conf
 
       # dev mode
-      # - .:/app
+      - .:/app
 
       # persist logs and locks
+      # please run `mkdir -p ./etc/lo{ck,gs}/{dl,sync}
       - ./etc/logs/:/root/.config/sosound/logs
       - ./etc/lock/:/root/.config/sosound/lock
 
@@ -34,6 +35,7 @@ services:
 
     env_file:
       - .env
+      # command: bash
 
 volumes:
   dataLocker:

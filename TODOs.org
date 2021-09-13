@@ -23,6 +23,7 @@ This is the legendary SouSound ; release candidate 2
 * v1.2
 
 ** Enhancement [0/4] [0%]
+*** TODO cli logs display wrong values
 *** TODO wrapper [0/1] [0%]
     - [ ] logging option
 *** TODO sync [0/2] [0%]
@@ -53,7 +54,6 @@ This is the legendary SouSound ; release candidate 2
 *** IDEA quick start
 
 * v1.1
-
 ** Enhancement [5/5] [100%]
 *** DONE wrapper  [2/10] [20%]
     CLOSED: [2019-09-05 Thu 15:15]
@@ -73,14 +73,12 @@ This is the legendary SouSound ; release candidate 2
     - [X] error if dl has some fail
     - [X] recap for number of file
 
-
 ** Fixes [1/1] [100%]
 *** DONE sync [1/1] [100%]
     CLOSED: [2019-09-05 Thu 15:14]
     - [X] sync stop at the first file ..
 
 * v1
-
 ** DONE dl utility [8/8] [100%]
    CLOSED: [2019-06-14 Fri 16:45]
    :LOGBOOK:
@@ -100,7 +98,6 @@ This is the legendary SouSound ; release candidate 2
 - [X] doc [2/2] [100%]
   - [X] conf file
   - [X] running
-
 
 ** DONE sync utility [8/8] [100%]
    CLOSED: [2019-08-12 Mon 10:47]

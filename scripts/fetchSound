@@ -58,56 +58,6 @@ NEW_TARGET=
 ENTRY=
 URL=""
 
-RUNNING_INFO="
-    download path :          $DL_PATH
-    download config file :   $DL_CONF_PATH
-    youtube-dl config file : $YT_CONF_PATH
-
-    log path :               $LOG_PATH
-    lock directory path :    $LOCK_DIR
-
-    dl mode :                $DL_MODE (0=all,1=youtube,2=soundcloud,3=disable_dl)
-    output mode :            $OUTPUT_MODE (0=logfile,1=std)
-    loglevel :               $LEVEL (0=error,1=info,2=warn,3=debug)
-
-    new target :             $NEW_TARGET
-    show url :               $SHOW
-    comment entry :          $TO_COMMENT
-"
-
-USAGE="
-Usage : $0 -d [path] -c [path] -y [path] -m [0..3] -s -n -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
-
-Run $0, a simple music downloader script.
-
-Download configuration options :
-
-    -d:     Directory root path for downloads. A full or relative path can be provide.
-            Default : [$DL_PATH]
-    -c:     Configuration file for the download. A full path must be provide.
-            Default : [$DL_CONF_PATH]
-    -y:     Youtube-dl configuration file path. A full path must be provide.
-            Default : [$YT_CONF_PATH]
-    -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
-            Default : [$DL_MODE]
-
-Configuration options :
-
-    -s:     Show the entry in the config file
-    -a:     Append entry to the config file.
-            Argument must be in format [EntryDirectory EntryURL]
-    -r:     Comment/Uncomment a entry from the config file.
-            Argument must be in format [EntryDirectory]
-
-Misc options :
-    -l:     log level (0=error,1=info,2=warn,3=debug).
-            Default : [$LEVEL]
-    -o:     Output mode. (0=logfile,1=std)
-    -i:     install required packages
-    -h:     display this screen
-    -n:     diable the color output
-"
-
 #
 # Misc
 #
@@ -417,6 +367,7 @@ check_running() {
         exit 4
     elif [ "`ls -l $LOCK_DIR | wc -l`" != "1" ]; then
         error "A dl process is already running"
+        ls -lna $LOCK_DIR
         exit 5
     fi
 }
@@ -428,7 +379,22 @@ check_running() {
 setup() {
     info "Running a few checks ..."
 
-    debug "$RUNNING_INFO"
+    debug "
+    download path :          $DL_PATH
+    download config file :   $DL_CONF_PATH
+    youtube-dl config file : $YT_CONF_PATH
+
+    log path :               $LOG_PATH
+    lock directory path :    $LOCK_DIR
+
+    dl mode :                $DL_MODE (0=all,1=youtube,2=soundcloud,3=disable_dl)
+    output mode :            $OUTPUT_MODE (0=logfile,1=std)
+    loglevel :               $LEVEL (0=error,1=info,2=warn,3=debug)
+
+    new target :             $NEW_TARGET
+    show url :               $SHOW
+    comment entry :          $TO_COMMENT
+"
 
     check_running
 
@@ -484,6 +450,38 @@ pre() {
 #
 
 while getopts "l:a:m:d:c:y:o:r:u:insh" o; do
+    USAGE="
+Usage : $0 -d [path] -c [path] -y [path] -m [0..3] -s -n -a [Entry URL] -r [Entry] -l [0..3] -o [1..2] -i -h
+
+Run $0, a simple music downloader script.
+
+Download configuration options :
+
+    -d:     Directory root path for downloads. A full or relative path can be provide.
+            Default : [$DL_PATH]
+    -c:     Configuration file for the download. A full path must be provide.
+            Default : [$DL_CONF_PATH]
+    -y:     Youtube-dl configuration file path. A full path must be provide.
+            Default : [$YT_CONF_PATH]
+    -m:     Mode (0=all,1=youtube,2=soundcloud,3=disable_dl)
+            Default : [$DL_MODE]
+
+Configuration options :
+
+    -s:     Show the entry in the config file
+    -a:     Append entry to the config file.
+            Argument must be in format [EntryDirectory EntryURL]
+    -r:     Comment/Uncomment a entry from the config file.
+            Argument must be in format [EntryDirectory]
+
+Misc options :
+    -l:     log level (0=error,1=info,2=warn,3=debug).
+            Default : [$LEVEL]
+    -o:     Output mode. (0=logfile,1=std)
+    -i:     install required packages
+    -h:     display this screen
+    -n:     diable the color output
+"
     case "${o}" in
         d)
             DL_PATH=${OPTARG}

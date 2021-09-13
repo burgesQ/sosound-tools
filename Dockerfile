@@ -1,32 +1,29 @@
-FROM bash:4.4
+FROM alpine:edge
 
 # This hack is widely applied to avoid python printing issues in docker containers.
 # See: https://github.com/Docker-Hub-frolvlad/docker-alpine-python3/pull/13
 ENV PYTHONUNBUFFERED=1
 
 # installing deps
-RUN echo "installing required package" && \
+RUN echo -e "#\n#\n# installing required package\n#\n#" && \
   apk add --no-cache \
-  android-tools curl ffmpeg git inotify-tools python3 sudo \
+  bash android-tools curl libprotobuf ffmpeg git inotify-tools python3 sudo tree \
   --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing \
   && python3 -m ensurepip \
   && rm -r /usr/lib/python*/ensurepip
 
-RUN echo "installing scdl" && \
+
+RUN echo -e "#\n#\n# installing scdl, youtube-dl and adb-sync\n#\n#" && \
   pip3 install --no-cache --upgrade pip setuptools wheel && \
-  pip3 install scdl
-
-RUN echo "installing youtbe-dl"  \
-  && curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl \
-  && chmod a+rx /usr/local/bin/youtube-dl
-
-
-RUN echo "installing adb-sync"  \
-  && git clone https://github.com/google/adb-sync /root/adb-sync \
-  && cp /root/adb-sync/adb-sync /usr/local/bin/ && rm -rf /root/adb-sync
+  pip3 install scdl && \
+  curl -L https://yt-dl.org/downloads/latest/youtube-dl -o /usr/local/bin/youtube-dl && \
+  chmod a+rx /usr/local/bin/youtube-dl && \
+  git clone https://github.com/google/adb-sync /root/adb-sync && \
+  cp /root/adb-sync/adb-sync /usr/local/bin/ && \
+  rm -rf /root/adb-sync
 
 # creating special directories
-RUN echo "creating required directories" && \
+RUN echo -e "#\n#\n# creating required directories\n#\n#" && \
   mkdir -p $HOME/.config/sosound/logs/dl && \
   mkdir -p $HOME/.config/sosound/logs/sync && \
   mkdir -p $HOME/.config/sosound/lock/dl && \
